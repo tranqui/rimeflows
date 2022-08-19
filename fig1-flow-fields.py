@@ -361,5 +361,5 @@ lines += [plt.Line2D((coord1[0], coord2[0]), (coord1[1], coord2[1]), transform=f
 
 fig.lines.extend(lines)
 
-plt.savefig('schematics.pdf')
-plt.savefig('schematics.png')
+plt.savefig('flow-fields.pdf')
+plt.savefig('flow-fields.png')
