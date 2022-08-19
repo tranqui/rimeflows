@@ -1,0 +1,26 @@
+Calculations of point particle capture efficiency in model 2d flows.
+
+The main output currently is the two figures for our upcoming manuscript.
+Run via:
+
+    python fig1-schematics.py
+
+and
+
+    python fig2-phase-portraits.py
+
+And these should output the figures as pdfs and pngs in the working directory.
+
+Bonus figure, showing transition from exp scaling to normal (square root) scaling of capture efficiency as initial conditions are rescaled in the inviscid flow case:
+
+    python inviscid-efficiency-vs-ics.py data/inviscid_eff_*
+
+The prepackaged data was previously generated via:
+
+    python efficiency.py 0.1 > data/efficiency_kuwabara_alpha=0.1.csv
+    python efficiency.py -f stokes > data/efficiency_stokes.csv
+    python efficiency.py -f shm > data/efficiency_shm.csv
+
+Out of date, need to update:
+
+    for gamma in 1.2 1.8 2.0 2.5 3.0 3.5 5.0 10.0; do python efficiency.py --flow inviscid --scalefac $gamma --maxdeltastokes 1.0 --dump > data/efficiency_inviscid_gamma=$gamma.csv; done
