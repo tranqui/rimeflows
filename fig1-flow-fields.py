@@ -60,13 +60,13 @@ inset.set_ylim([0, 0.2])
 
 x = 1e-2
 f = lambda x: 0.1*x**0.5
-annotation.slope_marker((x, f(x)), 0.5,
+annotation.slope_marker((x, f(x)), (1, 2),
                         poly_kwargs=dict(ec='black', fill=False, lw=0.5),
                         text_kwargs=dict(fontsize=8))
 axbig.set_xlabel(r'$\mathrm{St} - \mathrm{St}_c$', labelpad=0)
-axbig.set_ylabel(r'capture efficiency $\eta$', labelpad=0)
+axbig.set_ylabel(r'capture window $\lambda$', labelpad=0)
 inset.set_xlabel(r'inertia $\mathrm{St}$', labelpad=-5)
-inset.set_ylabel(r'$\eta$', labelpad=5)
+inset.set_ylabel(r'$\lambda$', labelpad=5)
 
 # Kuwabara subplot.
 
@@ -203,8 +203,8 @@ y = y0_list[-2]
 x = x0 - 0.25*L
 ax_inviscid.annotate('', (x, -y), (x, y), weight=0.1,
                arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='<->'))
-ax_inviscid.annotate(r'$\eta$', (x, 0), (3, 0),
-                     textcoords='offset points', ha='left', va='center', fontsize=6)
+ax_inviscid.annotate(r'$\lambda$', (x, 0), (4, 0),
+                     textcoords='offset points', ha='left', va='center', fontsize=8)
 
 ax_inviscid.fill_between([-2*L, 2*L], -L, L, fc=flow_color, zorder=-10)
 ax_inviscid.fill_between([x0 - 2*L, 0], -L, L, fc=cylinder_color)
@@ -355,7 +355,7 @@ arrow.set_in_layout(False)
 
 # Line connecting efficiency definition on inviscid flow plot to y-axis of big plot.
 
-coord1 = transFigure.transform(ax_inviscid.transAxes.transform([0.96, 0.5]))
+coord1 = transFigure.transform(ax_inviscid.transAxes.transform([0.98, 0.5]))
 coord2 = transFigure.transform(axbig.transAxes.transform([-0.175, 0.3]))
 lines += [plt.Line2D((coord1[0], coord2[0]), (coord1[1], coord2[1]), transform=fig.transFigure, lw=lw, ls='-')]
 
