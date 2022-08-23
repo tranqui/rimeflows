@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy import special
+from scipy.misc import derivative
 from scipy.special import iv, kn
 def knp(m, x): return special.kvp(m, x, 1)
 def ivp(m, x): return special.ivp(m, x, 1)
@@ -11,20 +12,20 @@ except: from cylinder import CylindricalFlowField
 
 def phi(m, n, x):
     return (kn(m+1, x) + kn(m-1, x)) * (iv(m-n, x) + iv(m+n, x)) + \
-        kn(m, x) * (iv(m-n-1, x) - iv(m-n+1, x) - iv(m+n-1, x) + iv(m+n+1, x))
+        kn(m, x) * (iv(m-n-1, x) + iv(m-n+1, x) + iv(m+n-1, x) + iv(m+n+1, x))
 
 def phip(m, n, x):
     return (knp(m+1, x) + knp(m-1, x)) * (iv(m-n, x) + iv(m+n, x)) + \
         (kn(m+1, x) + kn(m-1, x)) * (ivp(m-n, x) + ivp(m+n, x)) + \
-        knp(m, x) * (iv(m-n-1, x) - iv(m-n+1, x) - iv(m+n-1, x) + iv(m+n+1, x)) + \
-        kn(m, x) * (ivp(m-n-1, x) - ivp(m-n+1, x) - ivp(m+n-1, x) + ivp(m+n+1, x))
+        knp(m, x) * (iv(m-n-1, x) + iv(m-n+1, x) + iv(m+n-1, x) + iv(m+n+1, x)) + \
+        kn(m, x) * (ivp(m-n-1, x) + ivp(m-n+1, x) + ivp(m+n-1, x) + ivp(m+n+1, x))
 
 class FlowField(CylindricalFlowField):
     """Flow field obtained for low Reynolds number via the Renormalization Group (RG) approach
     to finding uniformly valid asymptotic approximations.
 
     Reference:
-        Veysey, J. and Goldenfeld, N, Rev. Mod. Phys. 79, 883 (2007).
+        Veysey, J. and Goldenfeld, N., Rev. Mod. Phys. 79, 883 (2007).
     """
 
     def __init__(self, Re):
@@ -44,9 +45,23 @@ class FlowField(CylindricalFlowField):
         """First (radial) derivative of radial part of streamfunction."""
         with np.errstate(divide='ignore'):
             p = self.Re * r
-            dPsi = self.Re * ( 1 + self.Re * (self.A1 - self.B1/p**2 +
-                                              self.X0*(phi(0, 1, 0.5*p) + p*phip(0, 1, 0.5*p))) )
-            return dPsi / self.Re**2
+            dpdr = self.Re
+            dPsi_dp = 1 + self.Re * ( self.A1 - self.B1/p**2 +
+                                      self.X0*(phi(0, 1, 0.5*p) + 0.5*p*phip(0, 1, 0.5*p)) )
+            return (dPsi_dp / self.Re**2) * dpdr
+
+    def fpp(self, r, dx=1e-4):
+        """Second (radial) derivative of radial part of streamfunction."""
+        return derivative(self.fp, r, dx=dx)
+
+    def fppp(self, r, dx=1e-4):
+        """Third (radial) derivative of radial part of streamfunction."""
+        return derivative(self.fp, r, dx=dx, n=2)
+
+    @property
+    def drag_coefficient(self):
+        """Drag coefficient for flow field."""
+        return -np.pi * self.fppp(1)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -71,5 +86,16 @@ if __name__ == '__main__':
 
     plt.xlim([-L, L])
     plt.ylim([-L, L])
+
+    Re = np.linspace(0, 1, 1001)
+    C = np.empty(Re.size)
+    for i, R in enumerate(Re):
+        flow = FlowField(R)
+        C[i] = R * flow.drag_coefficient / (4*np.pi)
+
+    plt.figure()
+    plt.plot(Re, C)
+    plt.xlabel(r'$\mathrm{Re}$')
+    plt.ylabel(r'$\mathrm{Re} \, C_D / 4\pi$')
 
     plt.show()
