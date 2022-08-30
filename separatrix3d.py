@@ -26,7 +26,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 
-from povray import PovrayMesh2, triangulate_grid
+from povray import PovrayLine, PovrayMesh2, triangulate_grid
 
 parser = argparse.ArgumentParser(description='separatrix construction in 3d')
 parser.add_argument('--tmax', default=20.0, type=float, help='max time, default 20.0')
@@ -218,8 +218,15 @@ elif args.mayavi: # 3d plots with mayavi
 else: # 3d plots with matplotlib
 
     if args.povray:
+        coordinates = np.array((xintersect, 10*yintersect, uintersect)).T
+        print(PovrayLine(coordinates, name='zeroAcceleration'))
         coordinates, triangles = triangulate_grid(xsurf, 10*ysurf, usurf)
         print(PovrayMesh2(coordinates, triangles, name='separatrix'))
+
+        for row in range(len(xsurf)):
+            coordinates = np.array((xsurf[row], 10*ysurf[row], usurf[row])).T
+            #import sys; sys.stderr.write(repr(coordinates.shape))
+            print(PovrayLine(coordinates, name=('line%d' % row)))
         import sys; sys.exit(0)
 
     ax = fig.add_subplot(projection='3d')

@@ -50,6 +50,34 @@ def triangulate_grid(*args):
     coordinates = np.array([x.flatten() for x in args]).T
     return coordinates, triangulation
 
+def pov_vector(v):
+    return str(v.tolist()).replace('[', '<').replace(']', '>')
+
+class PovrayLine:
+    """Generates a line in 3d as the union of cylinders to be rendered with ray-tracing."""
+
+    def __init__(self, coordinates, name='line'):
+        self.coordinates = coordinates
+        self.name = name
+
+    def write(self, f=sys.stdout):
+        """Generate the povray script.
+
+        Args:
+            f: filestream to output to.
+        """
+        f.write('#macro %s(lw)\n  merge\n  {' % self.name)
+        for v1, v2 in zip(self.coordinates, self.coordinates[1:]):
+            f.write('\n    cylinder { %s, %s, lw }' % (pov_vector(v1), pov_vector(v2)))
+        for v in self.coordinates:
+            f.write('\n    sphere { %s, lw }' % pov_vector(v))
+        f.write('\n  }\n#end')
+
+    def __repr__(self):
+        f = io.StringIO()
+        self.write(f)
+        return f.getvalue()
+
 class PovrayMesh2:
     """Generates a povray "mesh2" object ready to be rendered with ray-tracing."""
 
@@ -85,11 +113,11 @@ class PovrayMesh2:
             f: filestream to output to.
         """
         f.write('#declare %s = mesh2\n{\n  vertex_vectors\n  {\n    %d' % (self.name, len(self.coordinates)))
-        for v in self.coordinates: f.write(',\n    %s' % str(v.tolist()).replace('[', '<').replace(']', '>'))
+        for v in self.coordinates: f.write(',\n    %s' % pov_vector(v))
         f.write('\n  }\n  normal_vectors\n  {\n    %d' % len(self.vertex_normals))
-        for v in self.vertex_normals: f.write(',\n    %s' % str(v.tolist()).replace('[', '<').replace(']', '>'))
+        for v in self.vertex_normals: f.write(',\n    %s' % pov_vector(v))
         f.write('\n  }\n  face_indices\n  {\n    %d' % len(self.triangulation))
-        for v in self.triangulation: f.write(',\n    %s' % str(v.tolist()).replace('[', '<').replace(']', '>'))
+        for v in self.triangulation: f.write(',\n    %s' % pov_vector(v))
         f.write('\n  }\n}')
 
     def __repr__(self):
