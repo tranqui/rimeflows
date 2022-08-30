@@ -30,8 +30,8 @@ from povray import PovrayMesh2, triangulate_grid
 
 parser = argparse.ArgumentParser(description='separatrix construction in 3d')
 parser.add_argument('--tmax', default=20.0, type=float, help='max time, default 20.0')
-parser.add_argument('--nsvals', default=40, type=int, help='number of arc points, default 40')
-parser.add_argument('--nyvals', default=40, type=int, help='number of y0 points, default 40')
+parser.add_argument('--nsvals', default=50, type=int, help='number of arc points, default 50')
+parser.add_argument('--nyvals', default=100, type=int, help='number of y0 points, default 100')
 parser.add_argument('--ymax', default=1.5, type=float, help='max y0, default 1.5')
 parser.add_argument('--eps', default=0.01, type=float, help='start offset, default 0.01')
 parser.add_argument('--method', default='LSODA', help='integration method, default LSODA')

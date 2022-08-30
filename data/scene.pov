@@ -21,6 +21,7 @@ background { colour Blue }
   diffuse 0.6
   phong 0.1
   phong_size 40
+  brilliance 0.5
 }
 
 #declare matteFinish = finish
@@ -28,6 +29,13 @@ background { colour Blue }
   ambient 0.1
   diffuse 0.6
   phong 0.
+}
+
+#declare glassFinish = finish
+{
+  ambient 0.1
+  diffuse 0.6
+  phong 0.1
 }
 
 #declare v0 = <0 0 0>;
@@ -39,8 +47,8 @@ background { colour Blue }
 #declare cameraPos = focusPos + 0.9*<0 1 0.8>;
 
 // // Uncomment to zoom in on one edge of box.
-//#declare focusPos = vx+vy;
-//#declare cameraPos = focusPos + <0.025, 0.025, 0.025>;
+// #declare focusPos = vx+vy;
+// #declare cameraPos = focusPos + <0.025, 0.025, 0.025>;
 
 camera
 {
@@ -72,33 +80,34 @@ beam(focusPos + <0.25, 1.0, 0.25>, 0.5)
 
 // Frames for the domain boundaries.
 
-#declare axis_radius = 0.005;
-#macro axis(v0, v1)
-  cylinder{v0, v1, axis_radius}
-#end
-
-union
-{
-  axis(v0, vx)
-  axis(v0, vy)
-  axis(v0, vz)
-
-  // Axes should be in matte black.
-  pigment { colour Black }
-  finish { matteFinish }
-}
+// #declare axis_radius = 0.005;
+// #macro axis(v0, v1)
+//   cylinder{v0, v1, axis_radius}
+// #end
 
 #declare box_edge_radius = 0.005;
 #macro edge(v0, v1)
-  union
-  {
-    cylinder{v0, v1, box_edge_radius}
-    sphere{v0, box_edge_radius}
-    sphere{v1, box_edge_radius}
-  }
+  cylinder{v0, v1, box_edge_radius}
+#end
+#macro node(v1)
+  sphere{v1, box_edge_radius}
 #end
 
-union
+// merge
+// {
+//   edge(v0, vx)
+//   edge(v0, vy)
+//   edge(v0, vz)
+//   node(vx)
+//   node(vy)
+//   node(vz)
+
+//   // Axes should be in matte black.
+//   pigment { colour Black }
+//   finish { matteFinish }
+// }
+
+merge
 {
   edge(v0, vx)
   edge(v0, vy)
@@ -115,6 +124,16 @@ union
   edge(vx+vz, vx+vy+vz)
   edge(vy+vz, vx+vy+vz)
 
+  // Cap the ends with spheres so the edges join smoothly
+  node(v0)
+  node(vx)
+  node(vy)
+  node(vz)
+  node(vx+vy)
+  node(vx+vz)
+  node(vy+vz)
+  node(vx+vy+vz)
+
   // We apply some non-physical properties to these edges so the viewer unconsciously disregards
   // the edges: their presence acts as a guide to the eye to help get some 3d perspective when
   // looking at the image projected in 2d.
@@ -123,8 +142,7 @@ union
   pigment { colour White transmit 0.9 }
   interior { ior 2.5 } // index of refraction of diamond gives an ethereal-look
   no_shadow
-
-  finish { matteFinish }
+  finish { glassFinish }
 }
 
 // Stagnation point.
@@ -142,23 +160,30 @@ sphere {
 
 // xz-plane shows projection of streamlines there.
 
+// plane {
+//   y, 0
+
+//   bounded_by { box { v0, vx+vy+vz } }
+//   clipped_by { bounded_by }
+
 mesh2 {
-  vertex_vectors {
-    4, v0, vx, vx+vz, vz
-  }
-  face_indices {
-    2, <0,1,2>, <2,3,0>
-  }
+  vertex_vectors { 4, v0, vx, vx+vz, vz }
+  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
+  face_indices { 2, <0,1,2>, <2,3,0> }
+
+  uv_mapping
   no_shadow
-  pigment { colour noncollidingParticle }
-  finish { matteFinish }
+  //pigment { image_map { jpeg "test.jpg" } }
+  pigment { image_map { png "backdrop" } }
+  finish { shinyFinish }
 }
 
 // 3d separatrix surface.
 
 #include "separatrix3d.inc"
 
-mesh2 {
+mesh2
+{
   separatrix
   // Only show part of separatrix contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
