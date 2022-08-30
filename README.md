@@ -20,6 +20,13 @@ The prepackaged data was previously generated via:
     python efficiency.py 0.1 > data/efficiency_kuwabara_alpha=0.1.csv
     python efficiency.py -f stokes > data/efficiency_stokes.csv
     python efficiency.py -f shm > data/efficiency_shm.csv
+    python separatrix3d.py --povray > data/separatrix3d.inc
+
+Generate 3d surface for separatrix in our model toy problem (requires povray):
+
+    (cd data && povray +Q11 +A +AM2 +R5 +ua scene.pov)
+
+And the resulting scene.png file should be generated inside the data folder.
 
 Out of date, need to update:
 
