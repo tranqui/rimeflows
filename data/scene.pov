@@ -1,5 +1,6 @@
 #include "shapes.inc"
 #include "colors.inc"
+#include "functions.inc"
 
 global_settings
 {
@@ -13,7 +14,7 @@ global_settings
 #declare collidingManifold = rgb <0.855, 0.733, 0.89>;
 #declare collidingParticle = rgb <0.8, 0.404, 0.761>;
 
-background { colour Blue }
+//background { colour White }
 
 #declare shinyFinish = finish
 {
@@ -71,7 +72,6 @@ camera
     colour intensity*White
     parallel
     point_at focusPos
-    //shadowless
   }
 #end
 
@@ -172,16 +172,29 @@ mesh2 {
 
   uv_mapping
   no_shadow
-  //pigment { image_map { jpeg "test.jpg" } }
   pigment { image_map { png "backdrop" } }
   finish { shinyFinish }
 }
 
-// 3d separatrix surface.
+// Let's now render the actual main objects in the scene.
 
+// Retrieve mesh.
 #include "separatrix3d.inc"
-
 #declare line_width = 0.0025;
+
+// Zero acceleration surface.
+isosurface
+{
+  function { x*x + z }
+  bounded_by { box { v0, vx+vy+vz } }
+  clipped_by { bounded_by }
+
+  pigment { colour Grey transmit 0.7 }
+  no_shadow
+  finish { glassFinish }
+}
+
+// Projection of zero-acceleration surface onto y=0.
 object
 {
   zeroAcceleration(line_width)
@@ -192,6 +205,7 @@ object
   finish { matteFinish }
 }
 
+// Streamlines
 union
 {
   line0(line_width)
@@ -302,6 +316,7 @@ union
   finish { matteFinish }
 }
 
+// 3d separatrix surface.
 mesh2
 {
   separatrix
