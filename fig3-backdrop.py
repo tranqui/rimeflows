@@ -91,4 +91,4 @@ ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=stable_manifold_color, zord
 ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
 
-plt.savefig('data/backdrop.png')
+plt.savefig('data/backdrop.png', bbox_inches='tight', pad_inches=0)
