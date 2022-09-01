@@ -226,7 +226,7 @@ else: # 3d plots with matplotlib
         for row in range(len(xsurf)):
             coordinates = np.array((xsurf[row], 10*ysurf[row], usurf[row])).T
             #import sys; sys.stderr.write(repr(coordinates.shape))
-            print(PovrayLine(coordinates, name=('line%d' % row)))
+            print(PovrayLine(coordinates, name=('line{}'.format(row))))
         import sys; sys.exit(0)
 
     ax = fig.add_subplot(projection='3d')

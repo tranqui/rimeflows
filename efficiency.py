@@ -43,9 +43,9 @@ if args.x is None: args.x = flow.default_starting_distance
 
 Stc = flow.critical_stokes(args.x)
 
-print('# St           St-Stc         efficiency')
+print('# {:^16} {:^16} {:^16}'.format('St', 'St-Stc', 'efficiency'))
 St = Stc + np.geomspace(*args.stokes)
 eff = np.empty(St.size)
 for i,s in enumerate(St):
     eff[i] = flow.capture_efficiency(args.x, s)
-    print('%.12f %.12f %.12f' % (s, s-Stc, eff[i]))
+    print('  {:^16.12f} {:^16.12f} {:^16.12f}'.format(s, s-Stc, eff[i]))

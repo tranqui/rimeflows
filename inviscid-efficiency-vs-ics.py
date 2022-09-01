@@ -27,9 +27,9 @@ for path in natsorted(sys.argv[1:]):
 
     delta_St, St, y = np.genfromtxt(path).T
 
-    label = '%.1f' % gamma
+    label = '{.1f}'.format(gamma)
     if first:
-        label = '$\gamma=%s$' % label
+        label = '$\gamma={}$'.format(label)
         first = False
 
     plt.plot(delta_St, 2*y, lw=0.5, label=label)

@@ -102,5 +102,5 @@ if __name__ == "__main__":
 
     hiemenz = Hiemenz() # report default results
     res = (hiemenz.two_beta, hiemenz.eta_star, hiemenz.cutoff, hiemenz.tol)
-    print('Hiemenz defaults: 2β = %0.10f, η* = %0.10f, for cutoff = %g, tol = %g' % res)
+    print('Hiemenz defaults: 2β = %0.10f, η* = %0.10f, for cutoff = {0.g}, tol = {0.g}'.format(res))
 
