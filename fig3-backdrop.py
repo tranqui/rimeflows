@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np, matplotlib.pyplot as plt
+from scipy import interpolate, optimize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from arrows import add_arrow
 plt.style.use('figstyle.mplstyle')
@@ -44,7 +45,7 @@ nullcline_color = separatrix_color
 #bbox = dict(pad=0.1, fc='None', ec='None')
 bbox = dict(boxstyle='round', pad=0.1, fc='white', ec='none', alpha=0.75)
 
-N = 20000
+N = 50000
 xmin = -0.5
 xmax = 1.5
 vmin = -1
@@ -53,13 +54,26 @@ m = 3
 
 v0 = vmax
 
-#for x0 in np.linspace(m*xmin, m*xmax, 40):
-delta = -0.105
-for x0 in np.linspace(m*xmin + delta, m*xmax + delta, 40):
+# Find the location of the separatrix at our initial v:
+x, v = stokes.separatrix()
+x, v = x[x > 0], v[x > 0]
+guess = np.argmin((v-v0)**2)
+fx = interpolate.interp1d(np.arange(len(x)), x, kind='quadratic')
+fv = interpolate.interp1d(np.arange(len(v)), v, kind='quadratic')
+separatrix_x = fx( optimize.minimize(lambda i: (fv(i) - v0)**2, guess).x )
+
+# Sample points on either side of the separatrix across the full visible range so we
+# fill space with stream lines
+eps = 2e-3
+dx = 0.15
+delta_x = np.arange(0, m*(xmax - xmin), dx)[1:]
+central_x = separatrix_x + eps
+x_range = np.hstack((central_x - delta_x, central_x, central_x + delta_x))
+for x0 in x_range:
     x, v = stokes.streamline(x0, v0, tmax=1e3, N=N,
                              xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
 
-    if abs(x[-1]) < 1e-2: c = stable_streamline_color
+    if x0 < separatrix_x and x[-1] > 0: c = stable_streamline_color
     else: c = unstable_streamline_color
 
     pl, = ax.plot(x, v, lw=0.5, c=c, zorder=-2)
@@ -92,3 +106,4 @@ ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
 
 plt.savefig('data/backdrop.png', bbox_inches='tight', pad_inches=0, dpi=1000)
+#plt.show()
