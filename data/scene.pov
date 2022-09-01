@@ -180,7 +180,7 @@ mesh2 {
 
 // Retrieve mesh.
 #include "separatrix3d.inc"
-#declare line_width = 0.0025;
+#declare line_width = 0.0015;
 
 // Zero acceleration surface.
 isosurface
@@ -198,6 +198,8 @@ isosurface
 object
 {
   zeroAccelerationLine(line_width)
+
+  // Only show part contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
@@ -208,10 +210,10 @@ object
 // 3d separatrix surface.
 difference
 {
-  mesh2 { separatrix }
+  object { separatrix }
   sGridLines(line_width)
 
-  // Only show part of separatrix contained within our axes.
+  // Only show part contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
@@ -221,10 +223,10 @@ difference
 
 intersection
 {
-  mesh2 { separatrix }
+  object { separatrix }
   sGridLines(line_width)
 
-  // Only show part of separatrix contained within our axes.
+  // Only show part contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
