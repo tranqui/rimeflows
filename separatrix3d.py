@@ -26,7 +26,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 
-from povray import PovrayLine, PovrayMesh2, triangulate_grid
+import povray
 
 parser = argparse.ArgumentParser(description='separatrix construction in 3d')
 parser.add_argument('--tmax', default=20.0, type=float, help='max time, default 20.0')
@@ -218,22 +218,29 @@ elif args.mayavi: # 3d plots with mayavi
 else: # 3d plots with matplotlib
 
     if args.povray:
-        coordinates = np.array((xintersect, 10*yintersect, uintersect)).T
-        print(PovrayLine(coordinates, name='zeroAcceleration'))
-        coordinates, triangles = triangulate_grid(xsurf, 10*ysurf, usurf)
-        print(PovrayMesh2(coordinates, triangles, name='separatrix'))
+        lw = 'line_width'
+        y_aspect = 10
 
-        for row in range(len(xsurf)):
-            coordinates = np.array((xsurf[row], 10*ysurf[row], usurf[row])).T
-            #import sys; sys.stderr.write(repr(coordinates.shape))
-            print(PovrayLine(coordinates, name=('line{}'.format(row))))
+        surface = [xsurf, y_aspect * ysurf, usurf]
+        separatrix3d = povray.Mesh2(*povray.triangulate_grid(*surface))
+
+        intersection = np.array((xintersect, y_aspect * yintersect, uintersect)).T
+        zero_acceleration_line = povray.line(intersection, lw)
+
+        scoords, ycoords = povray.grid_lines(*surface)
+        slines = povray.Union([povray.line(x, lw) for x in scoords])
+        ylines = povray.Union([povray.line(x, lw) for x in ycoords])
+
+        print(povray.Declare('separatrix', separatrix3d))
+        print(povray.Macro('zeroAccelerationLine', zero_acceleration_line, arguments=[lw]))
+        print(povray.Macro('sGridLines', slines, arguments=[lw]))
         import sys; sys.exit(0)
 
     ax = fig.add_subplot(projection='3d')
 
     if args.triangulate:
 
-        coordinates, triangles = triangulate_grid(xsurf, usurf, ysurf)
+        coordinates, triangles = povray.triangulate_grid(xsurf, usurf, ysurf)
         ax.plot_trisurf(*coordinates.T, triangles=triangles)
 
     elif args.wireframe: # this is much easier !!

@@ -197,7 +197,7 @@ isosurface
 // Projection of zero-acceleration surface onto y=0.
 object
 {
-  zeroAcceleration(line_width)
+  zeroAccelerationLine(line_width)
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
@@ -205,125 +205,29 @@ object
   finish { matteFinish }
 }
 
-// Streamlines
-union
-{
-  line0(line_width)
-  line1(line_width)
-  line2(line_width)
-  line3(line_width)
-  line4(line_width)
-  line5(line_width)
-  line6(line_width)
-  line7(line_width)
-  line8(line_width)
-  line9(line_width)
-  line10(line_width)
-  line11(line_width)
-  line12(line_width)
-  line13(line_width)
-  line14(line_width)
-  line15(line_width)
-  line16(line_width)
-  line17(line_width)
-  line18(line_width)
-  line19(line_width)
-  line20(line_width)
-  line21(line_width)
-  line22(line_width)
-  line23(line_width)
-  line24(line_width)
-  line25(line_width)
-  line26(line_width)
-  line27(line_width)
-  line28(line_width)
-  line29(line_width)
-  line30(line_width)
-  line31(line_width)
-  line32(line_width)
-  line33(line_width)
-  line34(line_width)
-  line35(line_width)
-  line36(line_width)
-  line37(line_width)
-  line38(line_width)
-  line39(line_width)
-  line40(line_width)
-  line41(line_width)
-  line42(line_width)
-  line43(line_width)
-  line44(line_width)
-  line45(line_width)
-  line46(line_width)
-  line47(line_width)
-  line48(line_width)
-  line49(line_width)
-  line50(line_width)
-  line51(line_width)
-  line52(line_width)
-  line53(line_width)
-  line54(line_width)
-  line55(line_width)
-  line56(line_width)
-  line57(line_width)
-  line58(line_width)
-  line59(line_width)
-  line60(line_width)
-  line61(line_width)
-  line62(line_width)
-  line63(line_width)
-  line64(line_width)
-  line65(line_width)
-  line66(line_width)
-  line67(line_width)
-  line68(line_width)
-  line69(line_width)
-  line70(line_width)
-  line71(line_width)
-  line72(line_width)
-  line73(line_width)
-  line74(line_width)
-  line75(line_width)
-  line76(line_width)
-  line77(line_width)
-  line78(line_width)
-  line79(line_width)
-  line80(line_width)
-  line81(line_width)
-  line82(line_width)
-  line83(line_width)
-  line84(line_width)
-  line85(line_width)
-  line86(line_width)
-  line87(line_width)
-  line88(line_width)
-  line89(line_width)
-  line90(line_width)
-  line91(line_width)
-  line92(line_width)
-  line93(line_width)
-  line94(line_width)
-  line95(line_width)
-  line96(line_width)
-  line97(line_width)
-  line98(line_width)
-  line99(line_width)
-
-  bounded_by { box { v0, vx+vy+vz } }
-  clipped_by { bounded_by }
-
-  pigment { colour collidingParticle }
-  finish { matteFinish }
-}
-
 // 3d separatrix surface.
-mesh2
+difference
 {
-  separatrix
+  mesh2 { separatrix }
+  sGridLines(line_width)
+
   // Only show part of separatrix contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
   pigment { colour collidingParticle }
+  finish { shinyFinish }
+}
+
+intersection
+{
+  mesh2 { separatrix }
+  sGridLines(line_width)
+
+  // Only show part of separatrix contained within our axes.
+  bounded_by { box { v0, vx+vy+vz } }
+  clipped_by { bounded_by }
+
+  pigment { colour 0.5*collidingParticle }
   finish { shinyFinish }
 }
