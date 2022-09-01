@@ -20,16 +20,20 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from arrows import add_arrow
 plt.style.use('figstyle.mplstyle')
 
-from flows import stokes, shm
-stokes = stokes.OnAxis()
-shm = shm.OnAxis()
+import argparse
+parser = argparse.ArgumentParser(description='show streamlines for hybrid field')
+parser.add_argument('epsilon', type=float, nargs='?', default=0,
+                    help='epsilon parameter for hybrid flow field (default=0 for Stokes flow field)')
+args = parser.parse_args()
+
+from flows import hybrid
+flow = hybrid.OnAxis(args.epsilon)
 
 figsize = 3.375 # (inches)
 aspect_ratio = 2
 fig = plt.figure(figsize=(figsize, figsize/aspect_ratio))
 
 ax = plt.gca()
-ax.axis('off')
 
 palette = ['#4d0e5a', '#871c90', '#cc67c2', '#dabbe3', '#efda4d', '#ffffc0']
 
@@ -55,7 +59,7 @@ m = 3
 v0 = vmax
 
 # Find the location of the separatrix at our initial v:
-x, v = stokes.separatrix()
+x, v = flow.separatrix()
 x, v = x[x > 0], v[x > 0]
 guess = np.argmin((v-v0)**2)
 fx = interpolate.interp1d(np.arange(len(x)), x, kind='quadratic')
@@ -70,7 +74,7 @@ delta_x = np.arange(0, m*(xmax - xmin), dx)[1:]
 central_x = separatrix_x + eps
 x_range = np.hstack((central_x - delta_x, central_x, central_x + delta_x))
 for x0 in x_range:
-    x, v = stokes.streamline(x0, v0, tmax=1e3, N=N,
+    x, v = flow.streamline(x0, v0, tmax=1e3, N=N,
                              xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
 
     if x0 < separatrix_x and x[-1] > 0: c = stable_streamline_color
@@ -80,13 +84,13 @@ for x0 in x_range:
     add_arrow(pl, y=-0.075, zorder=-1)
     add_arrow(pl, y=-0.4, zorder=-1)
 
-x, v = stokes.limit_unstable_streamline()
+x, v = flow.limit_unstable_streamline()
 ax.plot(x, v, lw=0.5, c=unstable_streamline_color, zorder=-8)
 
-x, v = stokes.nullcline()
+x, v = flow.nullcline()
 ax.plot(x, v, '--', c=nullcline_color)
 
-x, v, (xc, vc) = stokes.separatrix(return_critical_point=True)
+x, v, (xc, vc) = flow.separatrix(return_critical_point=True)
 select = np.logical_and(x < 0, v < 1)
 pl, = ax.plot(x[select]-1e-2, v[select], c=unstable_streamline_color, lw=0.5)
 add_arrow(pl, y=0.1, zorder=-1, direction='backward')
@@ -105,5 +109,17 @@ ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=stable_manifold_color, zord
 ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
 
-plt.savefig('data/backdrop.png', bbox_inches='tight', pad_inches=0, dpi=1000)
+ax.set_xlabel('$\mathrm{St} \, x$')
+ax.set_ylabel('$\mathrm{St}^2 \, \dot{x}$')
+
+label = ax.text(0.99, 0.06, r'$\epsilon={:.3f}$'.format(args.epsilon), transform=ax.transAxes,
+                fontsize=10, bbox=bbox, horizontalalignment='right', verticalalignment='bottom')
+
+plt.savefig('data/hybrid_streamlines_eps={:.3f}.png'.format(args.epsilon), dpi=1000)
+
+ax.axis('off')
+
+label.remove()
+
+plt.savefig('data/hybrid_streamlines_noaxis_eps={:.3f}.png'.format(args.epsilon), bbox_inches='tight', pad_inches=0, dpi=1000)
 #plt.show()

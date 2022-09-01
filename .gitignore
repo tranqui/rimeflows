@@ -1,6 +1,7 @@
 # Generated figures
 *.pdf
 *.png
+*.gif
 *.inc
 *.pov-state
 
