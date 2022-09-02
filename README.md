@@ -25,7 +25,7 @@ Generate 3d surface for separatrix in our model toy problem (requires povray):
 
     python separatrix3d.py --povray > data/separatrix3d.inc
     python fig3-backdrop.py
-    (cd data && povray +Q11 +A +AM2 +R5 +ua scene.pov)
+    (cd data && povray -Iscene.pov scene.ini)
 
 And the resulting scene.png file should be generated inside the data folder.
 
