@@ -1,3 +1,6 @@
+#version 3.7;
+global_settings { assumed_gamma 1.0 }
+
 #include "shapes.inc"
 #include "colors.inc"
 #include "functions.inc"
@@ -8,11 +11,11 @@ global_settings
   ambient_light White
 }
 
-#declare noncollidingManifold = rgb <1, 1, 0.753>;
-#declare noncollidingParticle = rgb <0.937, 0.855, 0.302>;
+#declare noncollidingManifold = srgb <1, 1, 0.753>;         // #ffffc0
+#declare noncollidingParticle = srgb <0.937, 0.855, 0.302>; // #efda4d
 
-#declare collidingManifold = rgb <0.855, 0.733, 0.89>;
-#declare collidingParticle = rgb <0.8, 0.404, 0.761>;
+#declare collidingManifold = srgb <0.855, 0.733, 0.89>; // #dabbe3
+#declare collidingParticle = srgb <0.8, 0.404, 0.761>;  // #cc67c2
 
 //background { colour White }
 
@@ -217,7 +220,7 @@ difference
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
-  pigment { colour collidingParticle }
+  pigment { colour collidingManifold }
   finish { shinyFinish }
 }
 
@@ -230,6 +233,6 @@ intersection
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
-  pigment { colour 0.5*collidingParticle }
+  pigment { colour collidingParticle }
   finish { shinyFinish }
 }
