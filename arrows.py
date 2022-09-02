@@ -32,6 +32,7 @@ def add_arrow(line, x=None, y=None, direction='forward', size=7, color=None, eps
 
     xdata = line.get_xdata()
     ydata = line.get_ydata()
+    arrows = []
 
     # find closest index
     if x is None and y is None:
@@ -138,3 +139,6 @@ def add_arrow(line, x=None, y=None, direction='forward', size=7, color=None, eps
         arrow.set_in_layout(False)
         arrow.arrow_patch.set_clip_box(line.axes.bbox)
         #line.axes.plot(pos[0], pos[1], 'o', c=pl.get_color())
+        arrows += [arrow]
+
+    return arrows

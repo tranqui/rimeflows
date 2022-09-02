@@ -1,5 +1,5 @@
 #version 3.7;
-global_settings { assumed_gamma 1.0 }
+global_settings { assumed_gamma 2.2 }
 
 #include "shapes.inc"
 #include "colors.inc"
@@ -22,10 +22,9 @@ global_settings
 #declare shinyFinish = finish
 {
   ambient 0.1
-  diffuse 0.6
+  diffuse 0.8
   phong 0.1
   phong_size 40
-  //brilliance 0.5
 }
 
 #declare matteFinish = finish
@@ -58,6 +57,13 @@ global_settings
 
 // #declare focusPos = v0;
 // #declare cameraPos = focusPos + 0.1*<1 1 1>;
+
+#declare backScreen = mesh2 {
+  vertex_vectors { 4, v0, vx, vx+vz, vz }
+  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
+  face_indices { 2, <0,1,2>, <2,3,0> }
+}
+
 
 camera
 {
@@ -168,15 +174,16 @@ sphere {
 
 // xz-plane shows projection of streamlines there.
 
-mesh2 {
-  vertex_vectors { 4, v0, vx, vx+vz, vz }
-  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
-  face_indices { 2, <0,1,2>, <2,3,0> }
+object {
+  // vertex_vectors { 4, v0, vx, vx+vz, vz }
+  // uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
+  // face_indices { 2, <0,1,2>, <2,3,0> }
+  backScreen
 
   uv_mapping
   no_shadow
-  pigment { image_map { png "backdrop" } }
-  finish { shinyFinish }
+  pigment { image_map { png "hybrid_streamlines_noaxis_eps=0.000" } }
+  finish { matteFinish }
 }
 
 // Let's now render the actual main objects in the scene.
@@ -220,6 +227,7 @@ difference
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
+  no_shadow
   pigment { colour collidingManifold }
   finish { shinyFinish }
 }
@@ -233,6 +241,7 @@ intersection
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
+  no_shadow
   pigment { colour collidingParticle }
   finish { shinyFinish }
 }

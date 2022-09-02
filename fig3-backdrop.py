@@ -49,7 +49,6 @@ nullcline_color = separatrix_color
 #bbox = dict(pad=0.1, fc='None', ec='None')
 bbox = dict(boxstyle='round', pad=0.1, fc='white', ec='none', alpha=0.75)
 
-N = 50000
 xmin = -0.5
 xmax = 1.5
 vmin = -1
@@ -58,13 +57,27 @@ m = 3
 
 v0 = vmax
 
+def draw_streamline(x0, tmax=1e3, N=50000):
+    x, v = flow.streamline(x0, v0, tmax=1e3, N=N,
+                           xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
+
+    if x0 < separatrix_x and x[-1] > 0: c = stable_streamline_color
+    else: c = unstable_streamline_color
+
+    pl, = ax.plot(x, v, lw=0.5, c=c, zorder=-2)
+    arrows = []
+    arrows += add_arrow(pl, y=-0.075, zorder=-1)
+    arrows += add_arrow(pl, y=-0.4, zorder=-1)
+    return pl, arrows
+
 # Find the location of the separatrix at our initial v:
 x, v = flow.separatrix()
 x, v = x[x > 0], v[x > 0]
 guess = np.argmin((v-v0)**2)
 fx = interpolate.interp1d(np.arange(len(x)), x, kind='quadratic')
 fv = interpolate.interp1d(np.arange(len(v)), v, kind='quadratic')
-separatrix_x = fx( optimize.minimize(lambda i: (fv(i) - v0)**2, guess).x )
+separatrix_x = fx( optimize.minimize(lambda i: (fv(i) - v0)**2, guess).x )[0]
+
 
 # Sample points on either side of the separatrix across the full visible range so we
 # fill space with stream lines
@@ -72,17 +85,9 @@ eps = 2e-3
 dx = 0.15
 delta_x = np.arange(0, m*(xmax - xmin), dx)[1:]
 central_x = separatrix_x + eps
-x_range = np.hstack((central_x - delta_x, central_x, central_x + delta_x))
-for x0 in x_range:
-    x, v = flow.streamline(x0, v0, tmax=1e3, N=N,
-                             xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
-
-    if x0 < separatrix_x and x[-1] > 0: c = stable_streamline_color
-    else: c = unstable_streamline_color
-
-    pl, = ax.plot(x, v, lw=0.5, c=c, zorder=-2)
-    add_arrow(pl, y=-0.075, zorder=-1)
-    add_arrow(pl, y=-0.4, zorder=-1)
+x_range = np.hstack((central_x - delta_x, central_x + delta_x))
+for x0 in x_range: draw_streamline(x0)
+sep_pl, sep_arrows = draw_streamline(central_x)
 
 x, v = flow.limit_unstable_streamline()
 ax.plot(x, v, lw=0.5, c=unstable_streamline_color, zorder=-8)
@@ -120,6 +125,9 @@ plt.savefig('data/hybrid_streamlines_eps={:.3f}.png'.format(args.epsilon), dpi=1
 ax.axis('off')
 
 label.remove()
+
+sep_pl.set_visible(False)
+for arrow in sep_arrows: arrow.set_visible(False)
 
 plt.savefig('data/hybrid_streamlines_noaxis_eps={:.3f}.png'.format(args.epsilon), bbox_inches='tight', pad_inches=0, dpi=1000)
 #plt.show()
