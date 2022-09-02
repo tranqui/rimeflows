@@ -19,6 +19,7 @@
 
 import sys
 import numpy as np
+from scipy import interpolate
 import io
 import re
 from itertools import chain
@@ -177,21 +178,45 @@ class Cylinder(Primitive):
 
 # Derivative structures.
 
-def line(coordinates, line_width, *args, smooth=True, **kwargs):
+def stipple_coordinates(coordinates, resolutions=None, eps=1e-12):
+    if resolutions is None: return coordinates
+    ds = np.linalg.norm(np.diff(coordinates, axis=0), axis=1)
+    path_lengths = np.concatenate(([0], np.cumsum(ds, axis=0)))
+    f = interpolate.interp1d(path_lengths, coordinates.T)
+
+    stencil_size = np.sum(resolutions)
+    stencil = np.cumsum(resolutions)
+    sample_points = np.arange(0, path_lengths[-1], stencil_size)
+    sample_points = (np.tile(sample_points.reshape(-1,1), len(stencil)) + stencil).reshape(-1)
+
+    out_of_bounds = sample_points > path_lengths[-1]
+    sample_points[out_of_bounds] = path_lengths[-1]
+    sample_points = sample_points[:1+np.where(out_of_bounds)[0][0]]
+
+    return f(sample_points).T
+
+def line(coordinates, line_width, *args, stipple=None, smooth=True, **kwargs):
     """Generates a line in 3d as the union of cylinders that can be rendered with ray-tracing."""
 
     objects = []
 
-    # Create the line as a series of cylinders joining adjacent points.
-    for v1, v2 in zip(coordinates, coordinates[1:]):
-        objects += [Cylinder(pov_vector(v1), pov_vector(v2), line_width)]
+    if stipple is not None:
+        coordinates = stipple_coordinates(coordinates, stipple)
+        for coords in zip(coordinates[::2], coordinates[1::2]):
+            objects += [line(coords, line_width, *args, smooth=smooth, **kwargs)]
 
-    if smooth:
-        # Round the edges of the cylinders where the lines join to make it smooth.
-        for v in coordinates:
-            objects += [Sphere(pov_vector(v), line_width)]
+    else:
 
-    return Merge(*objects, *args, **kwargs)
+        # Create the line as a series of cylinders joining adjacent points.
+        for v1, v2 in zip(coordinates, coordinates[1:]):
+            objects += [Cylinder(pov_vector(v1), pov_vector(v2), line_width)]
+
+        if smooth:
+            # Round the edges of the cylinders where the lines join to make it smooth.
+            for v in coordinates:
+                objects += [Sphere(pov_vector(v), line_width)]
+
+    return Union(*objects, *args, **kwargs)
 
 class VectorBundle(Primitive):
     def __init__(self, coordinates, *args, **kwargs):

@@ -220,18 +220,18 @@ else: # 3d plots with matplotlib
     if args.povray:
         lw = 'line_width'
         y_aspect = 10
+        dashed_line_stipple = (0.01, 0.01)
 
         surface = [xsurf, y_aspect * ysurf, usurf]
         separatrix3d = povray.Mesh2(*povray.triangulate_grid(*surface))
 
         intersection = np.array((xintersect, y_aspect * yintersect, uintersect)).T
-        zero_acceleration_line = povray.line(intersection, lw)
+        zero_acceleration_line = povray.line(intersection, lw, stipple=dashed_line_stipple)
+
         on_axis_x = np.linspace(0, xintersect[0], 100)
         on_axis_u = -on_axis_x**2
         on_axis_nullcline = np.array((on_axis_x, np.zeros(on_axis_x.shape), on_axis_u)).T
-        #import sys
-        #sys.stderr.write(repr(on_axis_nullcline))
-        on_axis_nullcline = povray.line(on_axis_nullcline, lw)
+        on_axis_nullcline = povray.line(on_axis_nullcline, lw, stipple=dashed_line_stipple)
 
         scoords, ycoords = povray.grid_lines(*surface)
         slines = povray.Union([povray.line(x, lw) for x in scoords])
