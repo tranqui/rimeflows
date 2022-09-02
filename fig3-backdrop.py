@@ -93,7 +93,7 @@ x, v = flow.limit_unstable_streamline()
 ax.plot(x, v, lw=0.5, c=unstable_streamline_color, zorder=-8)
 
 x, v = flow.nullcline()
-ax.plot(x, v, '--', c=nullcline_color)
+pl_nullcline, = ax.plot(x, v, '--', c=nullcline_color)
 
 x, v, (xc, vc) = flow.separatrix(return_critical_point=True)
 select = np.logical_and(x < 0, v < 1)
@@ -128,6 +128,7 @@ label.remove()
 
 sep_pl.set_visible(False)
 for arrow in sep_arrows: arrow.set_visible(False)
+pl_nullcline.set_visible(False)
 
 plt.savefig('data/hybrid_streamlines_noaxis_eps={:.3f}.png'.format(args.epsilon), bbox_inches='tight', pad_inches=0, dpi=1000)
 #plt.show()

@@ -43,7 +43,6 @@ class OnAxis:
         self.k = k
 
     def u(self, x):
-        #return -self.k*x**(2-self.epsilon)
         return -self.k * np.abs(x)**(2-self.epsilon)
 
     def trajectory(self, r0, step=1e-12, rtol=1e-12, tmax=1e2, xmin=-5, xmax=5, vmin=-5, vmax=5):

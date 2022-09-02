@@ -29,9 +29,8 @@ global_settings
 
 #declare matteFinish = finish
 {
-  ambient 0.1
-  diffuse 0.6
-  phong 0.
+  ambient 1
+  diffuse 0
 }
 
 #declare glassFinish = finish
@@ -155,7 +154,7 @@ merge
 
 // Retrieve mesh.
 #include "separatrix3d.inc"
-#declare line_width = 0.0015;
+#declare line_width = 0.00125;
 
 // Stagnation point.
 #declare stagnation_point_radius = 0.015;
@@ -167,18 +166,6 @@ sphere {
     pigment { colour White }
     finish { ambient 1 }
   }
-}
-
-// xz-plane shows projection of streamlines onto the on-axis problem.
-mesh2 {
-  vertex_vectors { 4, v0, vx, vx+vz, vz }
-  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
-  face_indices { 2, <0,1,2>, <2,3,0> }
-
-  uv_mapping
-  no_shadow
-  pigment { image_map { png "hybrid_streamlines_noaxis_eps=0.000" } }
-  finish { ambient 1 diffuse 0 }
 }
 
 // Zero acceleration surface.
@@ -193,11 +180,46 @@ isosurface
   finish { glassFinish }
 }
 
+// Outline where zero-acceleration surface intersects separatrix and box boundaries
+#declare zeroAccelerationLine = merge
+{
+  onAxisNullcline(line_width)
+  zeroAccelerationIntersection(line_width)
+  object
+  {
+    onAxisNullcline(line_width)
+    translate vy
+  }
+
+  // Only show part contained within our axes.
+  bounded_by { box { v0, vx+vy+vz } }
+  clipped_by { bounded_by }
+
+  pigment { color Black }
+  finish { matteFinish }
+}
+
+zeroAccelerationLine
+
+// xz-plane shows projection of streamlines onto the on-axis problem.
+#declare backScreen = mesh2
+{
+  vertex_vectors { 4, v0, vx, vx+vz, vz }
+  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
+  face_indices { 2, <0,1,2>, <2,3,0> }
+
+  no_shadow
+  uv_mapping
+  pigment { image_map { png "hybrid_streamlines_noaxis_eps=0.000" } }
+  finish { matteFinish }
+}
+
+backScreen
+
 // 3d separatrix surface.
 difference
 {
   object { separatrix }
-  zeroAccelerationLine(line_width)
   #if (DrawStreamLines)
     sGridLines(line_width)
   #end
@@ -210,29 +232,11 @@ difference
   finish { shinyFinish }
 }
 
-// Projection of zero-acceleration surface onto y=0.
-intersection
-{
-  object { separatrix }
-  zeroAccelerationLine(line_width)
-
-  // Only show part contained within our axes.
-  bounded_by { box { v0, vx+vy+vz } }
-  clipped_by { bounded_by }
-
-  pigment { colour Black }
-  finish { shinyFinish }
-}
-
 #if (DrawStreamLines)
-  difference
+  intersection
   {
-    intersection
-    {
-      object { separatrix }
-      sGridLines(line_width)
-    }
-    zeroAccelerationLine(line_width)
+    object { separatrix }
+    sGridLines(line_width)
 
     // Only show part contained within our axes.
     bounded_by { box { v0, vx+vy+vz } }

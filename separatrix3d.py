@@ -226,13 +226,20 @@ else: # 3d plots with matplotlib
 
         intersection = np.array((xintersect, y_aspect * yintersect, uintersect)).T
         zero_acceleration_line = povray.line(intersection, lw)
+        on_axis_x = np.linspace(0, xintersect[0], 100)
+        on_axis_u = -on_axis_x**2
+        on_axis_nullcline = np.array((on_axis_x, np.zeros(on_axis_x.shape), on_axis_u)).T
+        #import sys
+        #sys.stderr.write(repr(on_axis_nullcline))
+        on_axis_nullcline = povray.line(on_axis_nullcline, lw)
 
         scoords, ycoords = povray.grid_lines(*surface)
         slines = povray.Union([povray.line(x, lw) for x in scoords])
         ylines = povray.Union([povray.line(x, lw) for x in ycoords])
 
         print(povray.Declare('separatrix', separatrix3d))
-        print(povray.Macro('zeroAccelerationLine', zero_acceleration_line, arguments=[lw]))
+        print(povray.Macro('zeroAccelerationIntersection', zero_acceleration_line, arguments=[lw]))
+        print(povray.Macro('onAxisNullcline', on_axis_nullcline, arguments=[lw]))
         print(povray.Macro('sGridLines', slines, arguments=[lw]))
         import sys; sys.exit(0)
 
