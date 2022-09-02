@@ -35,11 +35,11 @@ Out of date, need to update:
 
 Generating animated GIF showing change in streamlines as we move from limiting Stokes to inviscid case (SHM). First, create the streamlines for each flow field via:
 
-for eps in $(seq 0 0.005 0.2); do python fig3-backdrop.py $eps; done
+for eps in $(seq 0 0.01 1); do python fig3-backdrop.py $eps; done
 
 Or speed this up by doing it in parallel using xargs (replace $ncores with the number of CPU cores to use):
 
-    seq 0 0.002 0.12 | xargs -P$ncores -I% python fig3-backdrop.py %
+    seq 0 0.01 1 | xargs -P$ncores -I% python fig3-backdrop.py %
 Create the GIF:
 
     convert -delay 5 -loop 0 data/hybrid_streamlines_eps*.png -compress JPEG -quality 0 data/hybrid_streamlines_animated.gif

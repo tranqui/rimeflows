@@ -72,12 +72,12 @@ def draw_streamline(x0, tmax=1e3, N=50000):
 
 # Find the location of the separatrix at our initial v:
 x, v = flow.separatrix()
-x, v = x[x > 0], v[x > 0]
-guess = np.argmin((v-v0)**2)
+guess = np.where((v-v0)**2 < 0.1)[0]
+guess = guess[np.argmax(x[guess])]
+ax.plot(x[guess], v[guess], 'ko', mfc='None', mew=0.5, zorder=100)
 fx = interpolate.interp1d(np.arange(len(x)), x, kind='quadratic')
 fv = interpolate.interp1d(np.arange(len(v)), v, kind='quadratic')
 separatrix_x = fx( optimize.minimize(lambda i: (fv(i) - v0)**2, guess).x )[0]
-
 
 # Sample points on either side of the separatrix across the full visible range so we
 # fill space with stream lines
@@ -108,8 +108,8 @@ ax.fill_between([xmin, xmax], vmin, vmax, facecolor=unstable_manifold_color, zor
 ax.fill_between(x[x > 0], 0, v[x > 0], facecolor=stable_manifold_color, zorder=-5)
 ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=stable_manifold_color, zorder=-5)
 
-#ax.set_xlim([xmin, xmax])
-#ax.set_ylim([vmin, vmax])
+ax.set_xlim([m*xmin, m*xmax])
+ax.set_ylim([m*vmin, m*vmax])
 
 ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
