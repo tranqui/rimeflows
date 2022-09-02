@@ -177,7 +177,7 @@ class Cylinder(Primitive):
 
 # Derivative structures.
 
-def line(coordinates, line_width, *args, **kwargs):
+def line(coordinates, line_width, *args, smooth=True, **kwargs):
     """Generates a line in 3d as the union of cylinders that can be rendered with ray-tracing."""
 
     objects = []
@@ -186,9 +186,10 @@ def line(coordinates, line_width, *args, **kwargs):
     for v1, v2 in zip(coordinates, coordinates[1:]):
         objects += [Cylinder(pov_vector(v1), pov_vector(v2), line_width)]
 
-    # Round the edges of the cylinders where the lines join to make it smooth.
-    for v in coordinates:
-        objects += [Sphere(pov_vector(v), line_width)]
+    if smooth:
+        # Round the edges of the cylinders where the lines join to make it smooth.
+        for v in coordinates:
+            objects += [Sphere(pov_vector(v), line_width)]
 
     return Merge(*objects, *args, **kwargs)
 

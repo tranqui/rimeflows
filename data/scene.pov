@@ -58,13 +58,6 @@ global_settings
 // #declare focusPos = v0;
 // #declare cameraPos = focusPos + 0.1*<1 1 1>;
 
-#declare backScreen = mesh2 {
-  vertex_vectors { 4, v0, vx, vx+vz, vz }
-  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
-  face_indices { 2, <0,1,2>, <2,3,0> }
-}
-
-
 camera
 {
   perspective
@@ -84,20 +77,31 @@ camera
   }
 #end
 
-//beam(focusPos + <0.0, 1.0, 0.0>, 1.0)
-//beam(focusPos + <0.0, 0.0, 1.0>, 1.0)
+#macro illuminatedArea(position, v1, v2, n1, n2, intensity)
+  light_source
+  {
+    position
+    colour intensity*White
+    area_light v1, v2, n1, n2
+    area_illumination on
+    adaptive 1
+  }
+#end
 
-//beam(focusPos + <1.0, 1.0, 1.0>, 1.0)
-beam(cameraPos, 1.0)
-beam(focusPos + <1.0, 0.25, 0.25>, 0.5)
-beam(focusPos + <0.25, 1.0, 0.25>, 0.5)
+// Light up box from a mixture of angles to add some more shading to the 3d surface.
+#if (AreaLighting)
+  beam(cameraPos, 1.0)
+  // Light up the front xz plane and right yz planes to cast soft shadows:
+  illuminatedArea(vy, vx, vz, 10, 5, 0.5)
+  illuminatedArea(vx, vy, vz, 5, 5, 0.5)
+#else
+  beam(cameraPos, 1.0)
+  // Cheaper but leads to hard shadows: add two more parallel beams at oblique angles:
+  beam(focusPos + <1.0, 0.25, 0.25>, 0.5)
+  beam(focusPos + <0.25, 1.0, 0.25>, 0.5)
+#end
 
 // Frames for the domain boundaries.
-
-// #declare axis_radius = 0.005;
-// #macro axis(v0, v1)
-//   cylinder{v0, v1, axis_radius}
-// #end
 
 #declare box_edge_radius = 0.005;
 #macro edge(v0, v1)
@@ -106,20 +110,6 @@ beam(focusPos + <0.25, 1.0, 0.25>, 0.5)
 #macro node(v1)
   sphere { v1, box_edge_radius }
 #end
-
-// merge
-// {
-//   edge(v0, vx)
-//   edge(v0, vy)
-//   edge(v0, vz)
-//   node(vx)
-//   node(vy)
-//   node(vz)
-
-//   // Axes should be in matte black.
-//   pigment { colour Black }
-//   finish { matteFinish }
-// }
 
 merge
 {
@@ -159,8 +149,13 @@ merge
   finish { glassFinish }
 }
 
-// Stagnation point.
+// Let's now render the actual main objects in the scene.
 
+// Retrieve mesh.
+#include "separatrix3d.inc"
+#declare line_width = 0.0015;
+
+// Stagnation point.
 #declare stagnation_point_radius = 0.015;
 sphere {
   v0, stagnation_point_radius
@@ -168,29 +163,21 @@ sphere {
   texture
   {
     pigment { colour White }
-    finish { matteFinish }
+    finish { ambient 1 }
   }
 }
 
-// xz-plane shows projection of streamlines there.
-
-object {
-  // vertex_vectors { 4, v0, vx, vx+vz, vz }
-  // uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
-  // face_indices { 2, <0,1,2>, <2,3,0> }
-  backScreen
+// xz-plane shows projection of streamlines onto the on-axis problem.
+mesh2 {
+  vertex_vectors { 4, v0, vx, vx+vz, vz }
+  uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
+  face_indices { 2, <0,1,2>, <2,3,0> }
 
   uv_mapping
   no_shadow
   pigment { image_map { png "hybrid_streamlines_noaxis_eps=0.000" } }
-  finish { matteFinish }
+  finish { ambient 1 diffuse 0 }
 }
-
-// Let's now render the actual main objects in the scene.
-
-// Retrieve mesh.
-#include "separatrix3d.inc"
-#declare line_width = 0.0015;
 
 // Zero acceleration surface.
 isosurface
@@ -204,9 +191,27 @@ isosurface
   finish { glassFinish }
 }
 
-// Projection of zero-acceleration surface onto y=0.
-object
+// 3d separatrix surface.
+difference
 {
+  object { separatrix }
+  zeroAccelerationLine(line_width)
+  #if (DrawStreamLines)
+    sGridLines(line_width)
+  #end
+
+  // Only show part contained within our axes.
+  bounded_by { box { v0, vx+vy+vz } }
+  clipped_by { bounded_by }
+
+  pigment { colour collidingManifold }
+  finish { shinyFinish }
+}
+
+// Projection of zero-acceleration surface onto y=0.
+intersection
+{
+  object { separatrix }
   zeroAccelerationLine(line_width)
 
   // Only show part contained within our axes.
@@ -214,34 +219,24 @@ object
   clipped_by { bounded_by }
 
   pigment { colour Black }
-  finish { matteFinish }
-}
-
-// 3d separatrix surface.
-difference
-{
-  object { separatrix }
-  sGridLines(line_width)
-
-  // Only show part contained within our axes.
-  bounded_by { box { v0, vx+vy+vz } }
-  clipped_by { bounded_by }
-
-  no_shadow
-  pigment { colour collidingManifold }
   finish { shinyFinish }
 }
 
-intersection
-{
-  object { separatrix }
-  sGridLines(line_width)
+#if (DrawStreamLines)
+  difference
+  {
+    intersection
+    {
+      object { separatrix }
+      sGridLines(line_width)
+    }
+    zeroAccelerationLine(line_width)
 
-  // Only show part contained within our axes.
-  bounded_by { box { v0, vx+vy+vz } }
-  clipped_by { bounded_by }
+    // Only show part contained within our axes.
+    bounded_by { box { v0, vx+vy+vz } }
+    clipped_by { bounded_by }
 
-  no_shadow
-  pigment { colour collidingParticle }
-  finish { shinyFinish }
-}
+    pigment { colour collidingParticle }
+    finish { shinyFinish }
+  }
+#end
