@@ -74,6 +74,7 @@ camera
     colour intensity*White
     parallel
     point_at focusPos
+    shadowless
   }
 #end
 
@@ -85,6 +86,7 @@ camera
     area_light v1, v2, n1, n2
     area_illumination on
     adaptive 1
+    shadowless
   }
 #end
 
