@@ -109,8 +109,8 @@ ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=stable_manifold_color, zord
 ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
 
-ax.set_xlabel('$\mathrm{St} \, x$')
-ax.set_ylabel('$\mathrm{St}^2 \, \dot{x}$')
+ax.set_xlabel(r'$\mathrm{St}^{\frac{1}{1 - \epsilon}} \, x$')
+ax.set_ylabel(r'$\mathrm{St}^{\frac{2 - \epsilon}{1 - \epsilon}} \, \dot{x}$')
 
 label = ax.text(0.99, 0.06, r'$\epsilon={:.3f}$'.format(args.epsilon), transform=ax.transAxes,
                 fontsize=10, bbox=bbox, horizontalalignment='right', verticalalignment='bottom')

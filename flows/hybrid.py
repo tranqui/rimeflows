@@ -31,7 +31,7 @@ class FlowField(PlanarFlowField):
         self.k = k
 
     def u(self, x, y):
-        return -self.k * x**(2-self.epsilon)
+        return -self.k * np.abs(x)**(2-self.epsilon)
 
     def v(self, x, y):
         raise NotImplementedError
@@ -44,7 +44,7 @@ class OnAxis:
 
     def u(self, x):
         #return -self.k*x**(2-self.epsilon)
-        return -self.k * ( (1-self.epsilon) * x**2 + self.epsilon * x )
+        return -self.k * np.abs(x)**(2-self.epsilon)
 
     def trajectory(self, r0, step=1e-12, rtol=1e-12, tmax=1e2, xmin=-5, xmax=5, vmin=-5, vmax=5):
         terminate = lambda t,r: r[0] < xmax and r[0] > xmin and r[1] < vmax and r[1] > vmin
