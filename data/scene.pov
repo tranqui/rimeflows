@@ -161,11 +161,8 @@ merge
 sphere {
   v0, stagnation_point_radius
   no_shadow
-  texture
-  {
-    pigment { colour White }
-    finish { ambient 1 }
-  }
+  pigment { colour White }
+  finish { shinyFinish }
 }
 
 // Zero acceleration surface.
@@ -174,9 +171,8 @@ isosurface
   function { x*x + z }
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
-
-  pigment { colour Grey transmit 0.7 }
   no_shadow
+  pigment { colour Grey transmit 0.7 }
   finish { glassFinish }
 }
 
@@ -207,9 +203,9 @@ zeroAccelerationLine
   vertex_vectors { 4, v0, vx, vx+vz, vz }
   uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
   face_indices { 2, <0,1,2>, <2,3,0> }
+  uv_mapping
 
   no_shadow
-  uv_mapping
   pigment { image_map { png "hybrid_streamlines_noaxis_eps=0.000" } }
   finish { matteFinish }
 }
