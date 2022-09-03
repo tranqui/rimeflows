@@ -195,7 +195,11 @@ isosurface
   finish { matteFinish }
 }
 
-zeroAccelerationLine
+difference
+{
+  object { zeroAccelerationLine }
+  separatrix
+}
 
 // xz-plane shows projection of streamlines onto the on-axis problem.
 #declare backScreen = mesh2

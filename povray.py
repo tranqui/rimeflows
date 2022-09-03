@@ -149,6 +149,25 @@ class Primitive:
         self.write(f)
         return f.getvalue()
 
+class Attribute(Primitive):
+    """Simple one line key-value attribute."""
+
+    def __init__(self, value, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.value = value
+
+    @property
+    def body_open(self):
+        return ''
+
+    @property
+    def body(self):
+        return '{}'.format(self.value)
+
+    @property
+    def body_close(self):
+        return ''
+
 # Basic combinations of objects:
 class Union(Primitive): pass
 class Merge(Primitive): pass
@@ -231,16 +250,18 @@ class VectorBundle(Primitive):
 class VertexVectors(VectorBundle): pass
 class NormalVectors(VectorBundle): pass
 class FaceIndices(VectorBundle): pass
+class InsideVector(Attribute): pass
 
 class Mesh2(Primitive):
     """Generates a povray "mesh2" object ready to be rendered with ray-tracing."""
 
-    def __init__(self, coordinates, triangulation, *args, **kwargs):
+    def __init__(self, coordinates, triangulation, *args, inside_vector=None, **kwargs):
         """Create the mesh from raw data.
 
         Args:
             coordinates: vertex coordinates.
             triangulation: vertex indices.
+            inside_vector: vector direction to cast rays in order to determine interior.
         """
         triangulation = np.atleast_2d(triangulation)
         ntriangles, d = triangulation.shape
@@ -261,6 +282,10 @@ class Mesh2(Primitive):
         self.normal_vectors = NormalVectors(vertex_normals)
         self.face_indices = FaceIndices(triangulation)
         self.children += [self.vertex_vectors, self.normal_vectors, self.face_indices]
+
+        if inside_vector is not None:
+            self.inside_vector = InsideVector(pov_vector(inside_vector))
+            self.children += [self.inside_vector]
 
 # Variable declarations.
 
