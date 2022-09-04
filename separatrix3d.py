@@ -32,10 +32,11 @@ parser = argparse.ArgumentParser(description='separatrix construction in 3d')
 parser.add_argument('--tmax', default=20.0, type=float, help='max time, default 20.0')
 parser.add_argument('--nsvals', default=50, type=int, help='number of arc points, default 50')
 parser.add_argument('--nyvals', default=100, type=int, help='number of y0 points, default 100')
-parser.add_argument('--ymax', default=1.5, type=float, help='max y0, default 1.5')
+parser.add_argument('--ymax', default=3.0, type=float, help='max y0, default 3.0')
 parser.add_argument('--eps', default=0.01, type=float, help='start offset, default 0.01')
+parser.add_argument('--remove-offset', action='store_true', help='if true resulting mesh will undo offset so surface starts from x=x\'=0')
 parser.add_argument('--method', default='LSODA', help='integration method, default LSODA')
-parser.add_argument('--tol', default=1e-12, type=float, help='integrator tolerance, default 1e-12')
+parser.add_argument('--tol', default=1e-13, type=float, help='integrator tolerance, default 1e-13')
 parser.add_argument('--mayavi', action='store_true', help='use mayavi to render')
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--povray', action='store_true', help='produce a povray input script for the separatrix triangulation')
@@ -137,6 +138,10 @@ for y0 in np.linspace(0, args.ymax, args.nyvals):
     middle = [x for x in soln.y_events[0].transpose()] # the points captured by the arc length slicer
     end = soln.y.transpose()[1] # and the end point
 
+    if args.remove_offset:
+        start[0] = 0
+        start[1] = 0
+
     # Build the trajectory by adding the start and end points to the
     # points captured by the slice function.
 
@@ -219,7 +224,7 @@ else: # 3d plots with matplotlib
 
     if args.povray:
         lw = 'line_width'
-        y_aspect = 10
+        y_aspect = 5
         dashed_line_stipple = (0.01, 0.01)
 
         surface = [xsurf, y_aspect * ysurf, usurf]
@@ -229,7 +234,7 @@ else: # 3d plots with matplotlib
         intersection = np.array((xintersect, y_aspect * yintersect, uintersect)).T
         zero_acceleration_line = povray.line(intersection, lw, stipple=dashed_line_stipple)
 
-        on_axis_x = np.linspace(0, np.max(xsurf), 100)
+        on_axis_x = np.arange(0, np.max(xsurf), 0.01)
         on_axis_u = -on_axis_x**2
         on_axis_nullcline = np.array((on_axis_x, np.zeros(on_axis_x.shape), on_axis_u)).T
         on_axis_nullcline = povray.line(on_axis_nullcline, lw, stipple=dashed_line_stipple)

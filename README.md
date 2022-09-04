@@ -23,7 +23,7 @@ The prepackaged data was previously generated via:
 
 Generate 3d surface for separatrix in our model toy problem (requires povray):
 
-    python separatrix3d.py --povray > data/separatrix3d.inc
+    python separatrix3d.py --povray --remove-offset > data/separatrix3d.inc
     python fig3-backdrop.py
     (cd data && povray -Iscene.pov scene.ini)
 
