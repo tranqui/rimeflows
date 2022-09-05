@@ -14,6 +14,8 @@ global_settings
 #declare noncollidingManifold = srgb <1, 1, 0.753>;         // #ffffc0
 #declare noncollidingParticle = srgb <0.937, 0.855, 0.302>; // #efda4d
 
+#declare intersectionManifold = srgb <0.573, 0.365, 0.227>; // #925d3a
+
 #declare collidingManifold = srgb <0.855, 0.733, 0.89>; // #dabbe3
 #declare collidingParticle = srgb <0.8, 0.404, 0.761>;  // #cc67c2
 
@@ -63,7 +65,9 @@ camera
   //orthographic
   location cameraPos
   look_at  focusPos
-  sky      <0.0, 0.0, 1.0>
+  sky      <0, 0, 1>
+  up       <0, 0.75, 0>
+  right    <4/3, 0, 0>
 }
 
 #macro beam(position, intensity)
@@ -98,13 +102,13 @@ camera
 #else
   beam(cameraPos, 1.0)
   // Cheaper but leads to hard shadows: add two more parallel beams at oblique angles:
-  beam(focusPos + <1.0, 0.25, 0.25>, 0.5)
-  beam(focusPos + <0.25, 1.0, 0.25>, 0.5)
+  beam(focusPos + <1.0, 0.25, 0.25>, 0.25)
+  beam(focusPos + <0.25, 1.0, 0.25>, 0.25)
 #end
 
 // Frames for the domain boundaries.
 
-#declare box_edge_radius = 0.005;
+#declare box_edge_radius = 0.0025;
 #macro edge(v0, v1)
   cylinder { v0, v1, box_edge_radius }
 #end
@@ -112,17 +116,35 @@ camera
   sphere { v1, box_edge_radius }
 #end
 
+// Black lines for labelled axis edges
 merge
 {
   edge(v0, vx)
   edge(v0, vy)
+  node(v0)
+  node(vx)
+  node(vy)
+
+  edge(vy, vy+vz)
+  node(vy+vz)
+
+  no_shadow
+  pigment { colour Black }
+  finish { matteFinish }
+}
+
+// Glass lines for unlabelled non-axis edges.
+merge
+{
+  // edge(v0, vx)
+  // edge(v0, vy)
   edge(v0, vz)
 
   edge(vx, vx+vy)
   edge(vy, vx+vy)
   edge(vx, vx+vz)
   edge(vz, vx+vz)
-  edge(vy, vy+vz)
+  //edge(vy, vy+vz)
   edge(vz, vy+vz)
 
   edge(vx+vy, vx+vy+vz)
@@ -130,13 +152,13 @@ merge
   edge(vy+vz, vx+vy+vz)
 
   // Cap the ends with spheres so the edges join smoothly
-  node(v0)
-  node(vx)
-  node(vy)
+  // node(v0)
+  // node(vx)
+  // node(vy)
   node(vz)
   node(vx+vy)
   node(vx+vz)
-  node(vy+vz)
+  //node(vy+vz)
   node(vx+vy+vz)
 
   // We apply some non-physical properties to these edges so the viewer unconsciously disregards
@@ -145,16 +167,73 @@ merge
   // We first make the non-axis edges highly transparent, then prevent them from casting any
   // shadows on the scene to prevent optical artifacts from distracting the viewer.
   pigment { colour White transmit 0.9 }
-  interior { ior 2.5 } // index of refraction of diamond gives an ethereal-look
+  interior { ior 1.5 } // index of refraction of glass
+  //interior { ior 2.5 } // index of refraction of diamond gives an ethereal-look
   no_shadow
   finish { glassFinish }
+}
+
+// Draw axes labels/directions
+
+#macro axis_label(label, v0, v1)
+  #local rawLabel = text
+  {
+    ttf "latinmodern-math.ttf" label
+    0.001, 0
+    scale 0.05
+    pigment { colour Black }
+  }
+  #local com = 0.5*(max_extent(rawLabel) + min_extent(rawLabel));
+
+  object
+  {
+    rawLabel
+    translate -com
+    rotate <90, 0, 0>  // by default place text in xz-plane rather than xy-plane
+  }
+#end
+
+object
+{
+  #local axis = axis_label("x", v0, vx);
+  #local height = (max_extent(axis) - min_extent(axis)).z;
+  axis
+  translate 0.5*vx
+  translate height * vnormalize(-vz)
+}
+
+object
+{
+  #local axis = axis_label("y", v0, vy);
+  #local height = (max_extent(axis) - min_extent(axis)).z;
+  axis
+  rotate <0, 0, -90>
+  rotate <0, 0, 30>
+  rotate <30, 0, 0>
+  translate v0 + 0.5*vy
+  translate height * vnormalize(-vz)
+}
+
+object
+{
+  #local axis = axis_label("-x'", v0, vz);
+  #local length = (max_extent(axis) - min_extent(axis)).x;
+  axis
+  rotate <0, 0, -90>
+  rotate <0, 0, 60>
+  rotate <60, 0, 0>
+  translate v0 + vy + 0.5*vz
+  translate length * vnormalize(vy)
+  translate 0.25*length * vnormalize(-vx)
 }
 
 // Let's now render the actual main objects in the scene.
 
 // Retrieve mesh.
 #include "separatrix3d.inc"
-#declare line_width = 0.00125;
+#declare nullcline_line_width = 0.001;
+#declare intersection_line_width = 2.5*nullcline_line_width;
+#declare streamline_width = 0.00125;
 
 // Stagnation point.
 #declare stagnation_point_radius = 0.015;
@@ -169,36 +248,45 @@ sphere {
 isosurface
 {
   function { x*x + z }
-  bounded_by { box { v0, vx+vy+vz } }
-  clipped_by { bounded_by }
+  clipped_by { box { v0, vx+vy+vz } }
   no_shadow
   pigment { colour Grey transmit 0.7 }
   finish { glassFinish }
 }
 
 // Outline where zero-acceleration surface intersects separatrix and box boundaries
-#declare zeroAccelerationLine = merge
+
+intersection
 {
-  onAxisNullcline(line_width)
-  zeroAccelerationIntersection(line_width)
-  object
+  union
   {
-    onAxisNullcline(line_width)
-    translate vy
+    onAxisNullcline(nullcline_line_width)
+    object
+    {
+      onAxisNullcline(nullcline_line_width)
+      translate vy
+    }
   }
+  separatrix
 
   // Only show part contained within our axes.
   bounded_by { box { v0, vx+vy+vz } }
   clipped_by { bounded_by }
 
-  pigment { color Black }
+  pigment { colour Black }
   finish { matteFinish }
 }
 
-difference
+object
 {
-  object { zeroAccelerationLine }
-  separatrix
+  zeroAccelerationIntersection(intersection_line_width)
+
+  // Only show part contained within our axes.
+  bounded_by { box { v0, vx+vy+vz } }
+  clipped_by { bounded_by }
+
+  pigment { colour intersectionManifold }
+  finish { matteFinish }
 }
 
 // xz-plane shows projection of streamlines onto the on-axis problem.
@@ -207,6 +295,7 @@ difference
   vertex_vectors { 4, v0, vx, vx+vz, vz }
   uv_vectors { 4, <0,1>, <1,1>, <1,0>, <0,0> }
   face_indices { 2, <0,1,2>, <2,3,0> }
+  inside_vector  <0, -1, 0>
   uv_mapping
 
   no_shadow
@@ -216,12 +305,19 @@ difference
 
 backScreen
 
-// 3d separatrix surface.
+// 3d separatrix surface and interior.
+
+#declare collidingTrajectories = difference
+{
+  box { v0, vx+vy+vz }
+  separatrix
+}
+
 difference
 {
-  object { separatrix }
+  object { collidingTrajectories }
   #if (DrawStreamLines)
-    sGridLines(line_width)
+    sGridLines(streamline_width)
   #end
 
   // Only show part contained within our axes.
@@ -235,8 +331,8 @@ difference
 #if (DrawStreamLines)
   intersection
   {
-    object { separatrix }
-    sGridLines(line_width)
+    object { collidingTrajectories }
+    sGridLines(streamline_width)
 
     // Only show part contained within our axes.
     bounded_by { box { v0, vx+vy+vz } }

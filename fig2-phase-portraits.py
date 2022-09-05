@@ -39,6 +39,8 @@ unstable_manifold_color = palette[3]
 stable_streamline_color = palette[-2]
 unstable_streamline_color = palette[2]
 
+nullcline_intersection_color = '#925d3a'
+
 separatrix_color = 'k'
 nullcline_color = separatrix_color
 
@@ -94,7 +96,7 @@ pl, = ax1.plot(x[select]-1e-2, v[select], c=unstable_streamline_color, lw=0.5)
 add_arrow(pl, y=0.1, zorder=-1, direction='backward')
 #ax1.plot(x, v, c=separatrix_color)
 ax1.plot(0, 0, 'o', c=separatrix_color, mfc='w', zorder=20)
-ax1.plot(xc, vc, 'o', c=separatrix_color, mfc=unstable_streamline_color, zorder=20)
+ax1.plot(xc, vc, 'o', c=separatrix_color, mfc=nullcline_intersection_color, zorder=20)
 #ax1.plot(0, 0, 'o', c=separatrix_color, mfc=separatrix_color)
 
 # xs = np.linspace(0, 1/8, 100)

@@ -209,6 +209,7 @@ def stipple_coordinates(coordinates, resolutions=None, eps=1e-12):
     sample_points = (np.tile(sample_points.reshape(-1,1), len(stencil)) + stencil).reshape(-1)
 
     out_of_bounds = sample_points > path_lengths[-1]
+    #if np.any(out_of_bounds):
     sample_points[out_of_bounds] = path_lengths[-1]
     sample_points = sample_points[:1+np.where(out_of_bounds)[0][0]]
 
@@ -222,20 +223,21 @@ def line(coordinates, line_width, *args, stipple=None, smooth=True, **kwargs):
     if stipple is not None:
         coordinates = stipple_coordinates(coordinates, stipple)
         for coords in zip(coordinates[::2], coordinates[1::2]):
-            objects += [line(coords, line_width, *args, smooth=smooth, **kwargs)]
+            objects += [child for child in line(coords, line_width, *args, smooth=False, **kwargs).children]
 
     else:
 
         # Create the line as a series of cylinders joining adjacent points.
         for v1, v2 in zip(coordinates, coordinates[1:]):
-            objects += [Cylinder(pov_vector(v1), pov_vector(v2), line_width)]
+            if np.linalg.norm(v2 - v1) > 0:
+                objects += [Cylinder(pov_vector(v1), pov_vector(v2), line_width)]
 
-        if smooth:
-            # Round the edges of the cylinders where the lines join to make it smooth.
-            for v in coordinates:
-                objects += [Sphere(pov_vector(v), line_width)]
+    if smooth:
+        # Round the edges of the cylinders where the lines join to make it smooth.
+        for v in np.unique(coordinates, axis=0):
+            objects += [Sphere(pov_vector(v), line_width)]
 
-    return Union(*objects, *args, **kwargs)
+    return Merge(*objects, *args, **kwargs)
 
 class VectorBundle(Primitive):
     def __init__(self, coordinates, *args, **kwargs):
