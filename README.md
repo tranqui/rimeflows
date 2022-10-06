@@ -8,7 +8,7 @@ There are several flow fields implemented in this package. We provide the script
 
 Which should generate this figure:
 
-![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/data/kuwabara-trajectories.png)
+![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/blob/main/data/kuwabara-trajectories.png)
 
 Run this to show the square root efficiency scaling for the Kuwabara flow field:
 
@@ -16,7 +16,7 @@ Run this to show the square root efficiency scaling for the Kuwabara flow field:
 
 Which should generate this figure:
 
-![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/data/kuwabara-efficiency.png)
+![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/blob/main/data/kuwabara-efficiency.png)
 
 The various options available to customise output are shown in show-flow.py help page (i.e. by executing `python show-flow.py -h`).
 
