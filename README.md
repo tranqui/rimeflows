@@ -2,23 +2,6 @@
 
 ### Main scripts
 
-The main flow fields of interest are shown 
-
-The main output currently is the two figures for our upcoming manuscript.
-Run via:
-
-    python fig1-schematics.py
-
-and
-
-    python fig2-phase-portraits.py
-
-And these should output the figures as PDFs and PNGs in the working directory.
-
-We can show the efficiency scalings from this data via
-
-   python kuwabara.py -o data/kuwabara-trajectories.png
-
 There are several flow fields implemented in this package. We provide the script `show-flow.py` to visualise the various flow fields. The Kuwabara flow field is the most important for flow through porous media. Visualise this flow field by running e.g. (the parameters simply control the resulting colors)
 
    python show-flow.py 0.1 -cc grey -fc '#e6e6ff' -sc steelblue -ctc red -ntc blue
@@ -27,14 +10,26 @@ Which should generate this figure:
 
 ![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/data/kuwabara-trajectories.png)
 
-This makes use of precalculated efficiency data which was generated for volume fraction alpha=0.1 via the following command:
+Run this to show the square root efficiency scaling for the Kuwabara flow field:
+
+   python show-flow.py 0.15 -cm -ce data/efficiency_kuwabara_alpha\=0.15.csv
+
+Which should generate this figure:
+
+![Kuwabara particle trajectories](https://github.com/tranqui/rimeflows/data/kuwabara-efficiency.png)
+
+The various options available to customise output are shown in show-flow.py help page (i.e. by executing `python show-flow.py -h`).
+
+The above commands make use of precalculated efficiency data which were generated for volume fractions alpha=0.1 and alpha=0.15 via the following commands:
 
     python efficiency.py 0.1 > data/efficiency_kuwabara_alpha=0.1.csv
+    python efficiency.py 0.15 > data/efficiency_kuwabara_alpha=0.15.csv
 
-This can be modified as needed for different values of alpha.
+These can be modified as needed for different values of alpha.
 
 The flow fields implemented are:
-* Toy
+* Toy stokes field: limiting flow field approaching a generic no-slip/incompressible surface
+* Toy inviscid field: limiting flow field approaching a generic surface with slip boundary conditions
 * Kuwabara
 * Inviscid
 * Hiemenz
@@ -47,7 +42,7 @@ The main flow fields are summarised with schematics and showing their collection
 Generate 3d surface for separatrix in our model toy problem (requires povray):
 
     python separatrix3d.py --povray --remove-offset > data/separatrix3d.inc
-    python fig3-backdrop.py
+    python raytraced-flow-field-backdrop.py
     (cd data && povray -Iscene.pov scene.ini)
 
 And the resulting scene.png file should be generated inside the data folder.
@@ -63,6 +58,7 @@ Bonus figure, showing transition from exp scaling to normal (square root) scalin
 Some of the figures above rely on precalculated data. This data was generated via:
 
     python efficiency.py 0.1 > data/efficiency_kuwabara_alpha=0.1.csv
+    python efficiency.py 0.15 > data/efficiency_kuwabara_alpha=0.15.csv
     python efficiency.py -f stokes > data/efficiency_stokes.csv
     python efficiency.py -f shm > data/efficiency_shm.csv
 
