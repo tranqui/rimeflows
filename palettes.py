@@ -23,10 +23,6 @@ class PurpleGold:
     noncolliding_manifold_colour = palette[-1]
 
 class BlueRed:
-    """Colours generated from:
-    https://coolors.co/palette/4d0e5a-871c90-cc67c2-dabbe3-efda4d
-    """
-
     cylinder_colour = 'grey'
 
     flow_colour = '#e6e6ff'
