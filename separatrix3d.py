@@ -233,7 +233,8 @@ else: # 3d plots with matplotlib
                                     inside_vector=np.array((0,0,-1)))
 
         intersection = np.array((xintersect, y_aspect * yintersect, uintersect)).T
-        zero_acceleration_line = povray.line(intersection, lw, stipple=dotted_line_stipple)
+        zero_acceleration_line = povray.line(intersection, lw)
+        #zero_acceleration_line = povray.line(intersection, lw, stipple=dotted_line_stipple)
 
         on_axis_x = np.arange(0, np.max(xsurf), 0.01)
         on_axis_u = -on_axis_x**2
@@ -241,13 +242,16 @@ else: # 3d plots with matplotlib
         on_axis_nullcline = povray.line(on_axis_nullcline, lw, smooth=False, stipple=dashed_line_stipple)
 
         scoords, ycoords = povray.grid_lines(*surface)
-        slines = povray.Merge(*[obj for x in scoords for obj in povray.line(x, lw).children])
+        arrow_sep = 0.5
+        arrow_length = 1.5e-2
+        arrow_width = 'arrow_width'
+        slines = povray.Merge(*[obj for x in scoords for obj in povray.arrowed_line(x, lw, arrow_sep, arrow_length, arrow_width, reverse=True).children])
         ylines = povray.Merge(*[obj for x in ycoords for obj in povray.line(x, lw).children])
 
         print(povray.Declare('separatrix', separatrix3d))
         print(povray.Macro('zeroAccelerationIntersection', zero_acceleration_line, arguments=[lw]))
         print(povray.Macro('onAxisNullcline', on_axis_nullcline, arguments=[lw]))
-        print(povray.Macro('sGridLines', slines, arguments=[lw]))
+        print(povray.Macro('sGridLines', slines, arguments=[lw, arrow_width]))
         import sys; sys.exit(0)
 
     ax = fig.add_subplot(projection='3d')

@@ -1,4 +1,12 @@
+## Installation
+
+Prerequisites:
+* ?
+
+To generate a 3d ray-traced surface of the separatrix you need povray and [https://github.com/tranqui/povray](this) library to generate the primitives.
+
 ## Calculations of point particle capture efficiency in model 2d flows
+
 
 ### Main scripts
 

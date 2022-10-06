@@ -1,5 +1,4 @@
 #version 3.7;
-global_settings { assumed_gamma 2.2 }
 
 #include "shapes.inc"
 #include "colors.inc"
@@ -7,6 +6,7 @@ global_settings { assumed_gamma 2.2 }
 
 global_settings
 {
+  assumed_gamma 2.2
   max_trace_level 256
   ambient_light White
 }
@@ -14,7 +14,8 @@ global_settings
 #declare noncollidingManifold = srgb <1, 1, 0.753>;         // #ffffc0
 #declare noncollidingParticle = srgb <0.937, 0.855, 0.302>; // #efda4d
 
-#declare intersectionManifold = srgb <0.573, 0.365, 0.227>; // #925d3a
+//#declare intersectionManifold = srgb <0.573, 0.365, 0.227>; // #925d3a
+#declare intersectionManifold = srgb <1, 0, 0>;
 
 #declare collidingManifold = srgb <0.855, 0.733, 0.89>; // #dabbe3
 #declare collidingParticle = srgb <0.8, 0.404, 0.761>;  // #cc67c2
@@ -232,8 +233,9 @@ object
 // Retrieve mesh.
 #include "separatrix3d.inc"
 #declare nullcline_line_width = 0.001;
-#declare intersection_line_width = 2.5*nullcline_line_width;
+#declare intersection_line_width = 2*nullcline_line_width;
 #declare streamline_width = 0.00125;
+#declare arrow_width = 0.0075;
 
 // Stagnation point.
 #declare stagnation_point_radius = 0.015;
@@ -317,7 +319,7 @@ difference
 {
   object { collidingTrajectories }
   #if (DrawStreamLines)
-    sGridLines(streamline_width)
+    sGridLines(streamline_width, arrow_width)
   #end
 
   // Only show part contained within our axes.
@@ -332,7 +334,7 @@ difference
   intersection
   {
     object { collidingTrajectories }
-    sGridLines(streamline_width)
+    sGridLines(streamline_width, arrow_width)
 
     // Only show part contained within our axes.
     bounded_by { box { v0, vx+vy+vz } }
