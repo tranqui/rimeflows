@@ -89,10 +89,11 @@ x_range = np.hstack((central_x - delta_x, central_x + delta_x))
 for x0 in x_range: draw_streamline(x0)
 sep_pl, sep_arrows = draw_streamline(central_x)
 
-x, v = flow.limit_unstable_streamline()
+x, v = flow.limit_colliding_streamline()
 ax.plot(x, v, lw=0.5, c=unstable_streamline_color, zorder=-8)
 
-x, v = flow.nullcline()
+x = np.linspace(0, xmax, 100)
+v = stokes.nullcline(x)
 pl_nullcline, = ax.plot(x, v, '--', c=nullcline_color)
 
 x, v, (xc, vc) = flow.separatrix(return_critical_point=True)

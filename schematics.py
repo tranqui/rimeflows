@@ -377,3 +377,4 @@ fig.lines.extend(lines)
 
 plt.savefig('flow-fields.pdf')
 plt.savefig('flow-fields.png')
+plt.show()

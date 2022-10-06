@@ -73,10 +73,8 @@ class OnAxis:
 
         return x, v
 
-    def nullcline(self, xmax=5):
-        x = np.linspace(0, xmax, 1000)
-        v = self.u(x)
-        return x, v
+    def nullcline(self, x):
+        return self.u(x)
 
     def streamline(self, x0, v0, *args, tmax=1e2, N=2000, **kwargs):
         r0 = np.array([x0, v0])
@@ -92,7 +90,7 @@ class OnAxis:
 
         return x, v
 
-    def limit_unstable_streamline(self, *args, N=2000, step=1e-12, **kwargs):
+    def limit_colliding_streamline(self, *args, N=2000, step=1e-12, **kwargs):
         r0 = np.array([-step, 0])
         sol = self.trajectory(r0, *args, step=step, **kwargs)
 

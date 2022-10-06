@@ -1,4 +1,5 @@
 # Generated figures
+*.eps
 *.pdf
 *.png
 *.gif

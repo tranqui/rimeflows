@@ -100,7 +100,7 @@ class OnAxis:
 
         return x, v
 
-    def limit_unstable_streamline(self, *args, N=2000, step=1e-12, **kwargs):
+    def limit_colliding_streamline(self, *args, N=2000, step=1e-12, **kwargs):
         r0 = np.array([-step, 0])
         sol = self.trajectory(r0, *args, step=step, **kwargs)
 

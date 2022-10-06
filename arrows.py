@@ -53,6 +53,7 @@ def add_arrow(line, x=None, y=None, direction='forward', size=7, color=None, eps
     elif y is None:
         delta = np.sign(xdata - x)
         sign_change = ((np.roll(delta, 1) - delta) != 0).astype(int)
+        if len(sign_change) == 0: return
         sign_change[0] = 0
 
         points = []
@@ -80,6 +81,7 @@ def add_arrow(line, x=None, y=None, direction='forward', size=7, color=None, eps
     elif x is None:
         delta = np.sign(ydata - y)
         sign_change = ((np.roll(delta, 1) - delta) != 0).astype(int)
+        if len(sign_change) == 0: return
         sign_change[0] = 0
 
         points = []
