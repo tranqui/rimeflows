@@ -2,9 +2,9 @@
 
 ### Main scripts
 
-There are several flow fields implemented in this package. We provide the script `show-flow.py` to visualise the various flow fields. The Kuwabara flow field is the most important for flow through porous media. Visualise this flow field by running e.g. (the parameters simply control the resulting colors)
+There are several flow fields implemented in this package. We provide the script `show-flow.py` to visualise the various flow fields. The Kuwabara flow field is the most important for flow through porous media. Visualise this flow field by running e.g. (the parameters simply control the resulting colors):
 
-   python show-flow.py 0.1 -cc grey -fc '#e6e6ff' -sc steelblue -ctc red -ntc blue
+    python show-flow.py 0.1 -cc grey -fc '#e6e6ff' -sc steelblue -ctc red -ntc blue
 
 Which should generate this figure:
 
@@ -12,7 +12,7 @@ Which should generate this figure:
 
 Run this to show the square root efficiency scaling for the Kuwabara flow field:
 
-   python show-flow.py 0.15 -cm -ce data/efficiency_kuwabara_alpha\=0.15.csv
+    python show-flow.py 0.15 -cm -ce data/efficiency_kuwabara_alpha\=0.15.csv
 
 Which should generate this figure:
 
@@ -68,7 +68,7 @@ Some of the figures above rely on precalculated data. This data was generated vi
 
 Generating animated GIF showing change in streamlines as we move from limiting Stokes to inviscid case (SHM). First, create the streamlines for each flow field via:
 
-for eps in $(seq 0 0.01 1); do python fig3-backdrop.py $eps; done
+    for eps in $(seq 0 0.01 1); do python fig3-backdrop.py $eps; done
 
 Or speed this up by doing it in parallel using xargs (replace $ncores with the number of CPU cores to use):
 
