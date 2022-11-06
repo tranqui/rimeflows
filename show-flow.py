@@ -79,7 +79,7 @@ calc_ymin = ymin - delta
 calc_ymax = ymax + delta
 
 if args.efficiency:
-    figsize = (3.375, 3)
+    figsize = (3.375, 2.5)
     plt.figure(figsize=figsize)
     main = plt.gca()
 
@@ -89,7 +89,8 @@ if args.efficiency:
     main.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
     main.set_ylabel('capture efficiency $\lambda$')
 
-    figsize = tuple(0.1*s for s in figsize)
+    #figsize = tuple(0.1*s for s in figsize)
+    figsize = (0.35, 0.35)
     lin = main.inset_axes([0.125, 0.975 - figsize[1], figsize[0], figsize[1]])
     lin.plot(St, eff, 'o', mfc='w')
     lin.set_xlabel('$\mathrm{St}$', labelpad=-5)
@@ -133,7 +134,9 @@ if args.efficiency:
                             poly_kwargs=dict(ec='black', fill=False, lw=0.5),
                             text_kwargs=dict(fontsize=8))
 
-    ax = main.inset_axes([0.55, 0.05, 0.45, 0.45])
+    figsize = (0.5, 0.5)
+    ax = main.inset_axes([1 - figsize[0], 0.05, figsize[0], 0.05 + figsize[1]])
+    #ax = main.inset_axes([0.55, 0.05, 0.45, 0.45])
     ax.set_aspect(1)
 
 else:
