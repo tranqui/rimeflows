@@ -4,6 +4,8 @@
 *.png
 *.gif
 *.inc
+*.dat
+*.agr
 *.pov-state
 
 # Byte-compiled / optimized / DLL files
