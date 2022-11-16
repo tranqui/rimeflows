@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # hiemenz_plot.py -- plot or generate data for Hiemenz function.
 
@@ -31,21 +30,21 @@ parser = argparse.ArgumentParser(description='plot Hiemenz function')
 parser.add_argument('--hiemenz-cutoff', default=10.0, type=float, help='Hiemenz cutoff, default 10.0')
 parser.add_argument('--hiemenz-bracket', default='1.22,1.24', help='Hiemenz bracket, default 1.22,1.24')
 parser.add_argument('--hiemenz-tol', default=1.0e-12, type=float, help='Hiemenz tolerance, default 1.0e-12')
-parser.add_argument('--linspace', default='0,20,80', help='linspace range for η, default 0,20,80')
+parser.add_argument('--linspace', default='0,20,80', help='linspace range for eta, default 0,20,80')
 parser.add_argument('-o', '--output', help='write results as tab-separated values to a file')
 args = parser.parse_args()
 
 hiemenz = Hiemenz(cutoff=args.hiemenz_cutoff, init_bracket=eval('[' + args.hiemenz_bracket + ']'), tol=args.hiemenz_tol)
 
-η = np.linspace(*eval('[' + args.linspace + ']'))
+eta = np.linspace(*eval('[' + args.linspace + ']'))
 
-φ, φp, φpp = hiemenz.func(η)
+phi, phip, phipp = hiemenz.func(eta)
 
-df = pd.DataFrame({"η":η, "φ":φ, "φ'":φp, "φ''":φpp})
+df = pd.DataFrame({"eta":eta, "phi":phi, "phi'":phip, "phi''":phipp})
 
 if args.output:
 
-    df.set_index('η', inplace=True) # avoid duplicating existing column
+    df.set_index('eta', inplace=True) # avoid duplicating existing column
 
     with open(args.output, 'w') as f:
         print('#' + df.index.name + '\t' + '\t'.join(df.columns), file=f)
@@ -53,11 +52,11 @@ if args.output:
 
     print(f'Data written to {args.output}')
 
-else: # plot φ / η, φ', φ" as a function of η
+else: # plot phi / eta, phi', phi" as a function of eta
 
-    df.index = df['η'] # duplicates existing column but needed below
-    df['φ / η'] = df['φ'] / df['η']
-    df.at[0, 'φ/η'] = 0 # because we know φ, φ' → 0 as η → 0.
-    df[["φ / η", "φ'", "φ''"]].plot()
+    df.index = df['eta'] # duplicates existing column but needed below
+    df['phi / eta'] = df['phi'] / df['eta']
+    df.at[0, 'phi/eta'] = 0 # because we know phi, phi' → 0 as eta → 0.
+    df[["phi / eta", "phi'", "phi''"]].plot()
     plt.show()
 
