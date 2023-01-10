@@ -29,8 +29,8 @@ parser.add_argument('-o', '--output', type=str, help='output plot to file (e.g. 
 args = parser.parse_args()
 
 from flows import stokes, shm
-stokes = stokes.OnAxis()
-shm = shm.OnAxis()
+stokes = stokes.FlowField().on_axis
+shm = shm.FlowField().on_axis
 
 figsize = 3.375 # (inches)
 fig, (ax1, ax3) = plt.subplots(nrows=2, figsize=(figsize, 1.5*figsize))

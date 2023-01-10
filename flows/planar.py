@@ -20,7 +20,80 @@ from scipy import integrate
 try: from .refine import logical_refine
 except: from refine import logical_refine
 
+class OnAxisFlow:
+    def __init__(self, flow):
+        self.full_flow = flow
+
+    def u(self, x):
+        return self.full_flow.u(x, 0)
+
+    def trajectory(self, r0, St, step=1e-12, atol=1e-12, rtol=1e-12, tmax=1e2, xmin=-5, xmax=5, vmin=-5, vmax=5):
+        terminate = lambda t,r: r[0] < xmax and r[0] > xmin and r[1] < vmax and r[1] > vmin
+        terminate.terminal = True
+        terminate.direction = -1
+
+        xp = lambda x,v: v
+        vp = lambda x,v: (self.u(x) - v)/St
+        rp = lambda t,r: [xp(*r), vp(*r)]
+        return integrate.solve_ivp(rp, (0, tmax), r0, first_step=step, atol=atol, rtol=rtol, dense_output=True, events=terminate)
+
+    def streamline(self, x0, v0, St=1, tmax=1e2, N=2000, **kwargs):
+        r0 = np.array([x0, v0])
+        sol1 = self.trajectory(r0, St, tmax=-tmax, **kwargs)
+        sol2 = self.trajectory(r0, St, tmax=tmax, **kwargs)
+
+        t1 = np.linspace(sol1.t[-1], 0, N//2)
+        t2 = np.linspace(0, sol2.t[-1], N-N//2)
+        x1, v1 = sol1.sol(t1)
+        x2, v2 = sol2.sol(t2)
+        x = np.concatenate([x1, x2])
+        v = np.concatenate([v1, v2])
+
+        return x, v
+
+    def separatrix(self, *args, St=1, step=1e-12, tmax=1e2, N=2000, return_critical_point=False, **kwargs):
+        r0 = step * np.array([1, -1])
+        sol1 = self.trajectory(r0, St, *args, tmax=-tmax, **kwargs)
+        sol2 = self.trajectory(-r0, St, *args, tmax=-tmax, **kwargs)
+
+        # Find location of critical point where separatrix crosses v' = 0:
+        umin = lambda t: sol1.sol(t)[1]
+        from scipy.optimize import minimize_scalar
+        imin = np.argmin(sol1.y[1])
+        tguess1 = sol1.t[imin-1]
+        tguess2 = sol1.t[imin+1]
+
+        t1 = np.linspace(sol1.t[-1], 0, N//2)
+        t2 = np.linspace(0, sol2.t[-1], N-N//2)
+        x1, v1 = sol1.sol(t1)
+        x2, v2 = sol2.sol(t2)
+        x = np.concatenate([x1, x2])
+        v = np.concatenate([v1, v2])
+
+        if return_critical_point:
+            critical_point = sol1.sol(minimize_scalar(umin, (tguess1, tguess2)).x)
+            return x, v, critical_point
+
+        return x, v
+
+    def nullcline(self, x):
+        return self.u(x)
+
+    def limit_colliding_streamline(self, St=1, N=2000, step=1e-12, **kwargs):
+        r0 = np.array([-step, 0])
+        sol = self.trajectory(r0, St, step=step, **kwargs)
+
+        t = np.linspace(0, sol.t[-1], N-1)
+        x, v = sol.sol(t)
+        x = np.concatenate([[0], x])
+        v = np.concatenate([[0], v])
+        return x, v
+
 class PlanarFlowField:
+    @property
+    def on_axis(self):
+        return OnAxisFlow(self)
+
     @property
     def default_starting_distance(self):
         """Default initial condition for stagnation point flows."""

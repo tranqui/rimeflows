@@ -30,38 +30,6 @@ class FlowField(PlanarFlowField):
     def v(self, x, y):
         return self.k * y
 
-class OnAxis:
-    def __init__(self, k=1):
-        self.k = k
-
-    def u(self, x):
-        return -self.k * x
-
-    def trajectory(self, r0, St, step=1e-12, atol=1e-12, rtol=1e-12, tmax=1e2, xmin=-5, xmax=5, vmin=-5, vmax=5):
-        terminate = lambda t,r: r[0] < xmax and r[0] > xmin and r[1] < vmax and r[1] > vmin
-        terminate.terminal = True
-        terminate.direction = -1
-
-        xp = lambda x,v: v
-        vp = lambda x,v: (self.u(x) - v)/St
-        rp = lambda t,r: [xp(*r), vp(*r)]
-
-        return solve_ivp(rp, (0, tmax), r0, first_step=step, atol=atol, rtol=rtol, dense_output=True, events=terminate)
-
-    def streamline(self, x0, v0, St=0, *args, k=1, tmax=1e2, N=2000, **kwargs):
-        r0 = np.array([x0, v0])
-        sol1 = self.trajectory(r0, St, *args, tmax=-tmax, **kwargs)
-        sol2 = self.trajectory(r0, St, *args, tmax=tmax, **kwargs)
-
-        t1 = np.linspace(sol1.t[-1], 0, N//2)
-        t2 = np.linspace(0, sol2.t[-1], N-N//2)
-        x1, v1 = sol1.sol(t1)
-        x2, v2 = sol2.sol(t2)
-        x = np.concatenate([x1, x2])
-        v = np.concatenate([v1, v2])
-
-        return x, v
-
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
