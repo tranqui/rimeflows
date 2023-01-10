@@ -283,7 +283,7 @@ class PlanarFlowField:
         _, _, collides = self.on_axis_trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def critical_stokes(self, x, niters=25, quiet=True, *args, **kwargs):
+    def critical_stokes(self, x, niters=50, quiet=True, *args, **kwargs):
         """Estimate critical Stokes number above which point particle capture occurs.
 
         This requires solving the on-axis problem only.

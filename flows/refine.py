@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
 import numpy as np
 
 def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
@@ -38,13 +39,15 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
     while xguess < xupper:
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: print('initial refinement: [%.4f %.4f] guess=%.4f' % (xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('initial refinement: [%.4f %.4f] guess=%.4f\n' % (xlower, xupper, xguess))
         xguess *= 2
 
     for i in range(niters):
         xguess = 0.5 * (xlower + xupper)
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: print('refining %d/%d: [%.4f %.4f] guess=%.4f' % (i+1, niters, xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('refining %d/%d: [%.4f %.4f] guess=%.4f\n' % (i+1, niters, xlower, xupper, xguess))
+
+    if not quiet: sys.stderr.write('best guess: %.8f\n' % (0.5*(xlower + xupper)))
 
     return xlower, xupper
