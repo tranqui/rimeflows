@@ -3,8 +3,6 @@
 Prerequisites:
 * ?
 
-To generate a 3d ray-traced surface of the separatrix you need povray and [https://github.com/tranqui/povray](this) library to generate the primitives.
-
 ## Calculations of point particle capture efficiency in model 2d flows
 
 
@@ -47,14 +45,6 @@ The main flow fields are summarised with schematics and showing their collection
 
     python schematics.py
 
-Generate 3d surface for separatrix in our model toy problem (requires povray):
-
-    python separatrix3d.py --povray --remove-offset > data/separatrix3d.inc
-    python raytraced-flow-field-backdrop.py
-    (cd data && povray -Iscene.pov scene.ini)
-
-And the resulting scene.png file should be generated inside the data folder.
-
 ### Bonus figures
 
 Bonus figure, showing transition from exp scaling to normal (square root) scaling of capture efficiency as initial conditions are rescaled in the inviscid flow case:
@@ -76,11 +66,11 @@ Some of the figures above rely on precalculated data. This data was generated vi
 
 Generating animated GIF showing change in streamlines as we move from limiting Stokes to inviscid case (SHM). First, create the streamlines for each flow field via:
 
-    for eps in $(seq 0 0.01 1); do python fig3-backdrop.py $eps; done
+    for eps in $(seq 0 0.01 1); do python on-axis-phase-portrait.py $eps; done
 
 Or speed this up by doing it in parallel using xargs (replace $ncores with the number of CPU cores to use):
 
-    seq 0 0.01 1 | xargs -P$ncores -I% python fig3-backdrop.py %
+    seq 0 0.01 1 | xargs -P$ncores -I% python on-axis-phase-portrait.py %
 Create the GIF:
 
     convert -delay 5 -loop 0 data/hybrid_streamlines_eps*.png -compress JPEG -quality 0 data/hybrid_streamlines_animated.gif
