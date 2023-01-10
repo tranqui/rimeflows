@@ -17,8 +17,8 @@
 import argparse
 import numpy as np, matplotlib.pyplot as plt
 
-from flows import kuwabara, inviscid, rg, stokes, shm
-flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm}
+from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz
+flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz}
 
 parser = argparse.ArgumentParser(description='calculate inertial collection efficiency for point particles at stagnation point flows')
 parser.add_argument('-f', '--flow', default='kuwabara', choices=flow_fields.keys(),
@@ -44,6 +44,7 @@ if args.x is None: args.x = flow.default_starting_distance
 Stc = flow.critical_stokes(args.x)
 
 print('# {:^16} {:^16} {:^16}'.format('St', 'St-Stc', 'efficiency'))
+args.stokes[-1] = int(args.stokes[-1])
 St = Stc + np.geomspace(*args.stokes)
 eff = np.empty(St.size)
 for i,s in enumerate(St):

@@ -215,7 +215,8 @@ class PlanarFlowField:
             return 0
 
         ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet)
-        return 0.5 * (ylow + yhigh)
+        yestimate = 0.5 * (ylow + yhigh)
+        return 2*yestimate # capture efficiency covers both +ve and -ve y, so x2
 
     def on_axis_eom(self, x, u, St):
         """Equation of motion for massive particle immersed in flow field approaching on-axis."""
