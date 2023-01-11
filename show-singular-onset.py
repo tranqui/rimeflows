@@ -24,7 +24,7 @@ paths = natsorted(glob('data/efficiency_hiemenz*.csv'))
 Stc = {}
 
 figsize1 = (3.375, 2.1)
-figsize2 = (3.375, 3)
+figsize2 = (3.375, 2.5)
 fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(figsize1[0], 2*figsize1[1]), constrained_layout=True)
 plt.figure(figsize=figsize2)
 ax3 = plt.gca()
@@ -68,7 +68,9 @@ for i, path in enumerate(paths):
     ax1.plot(St, eff, c=c, lw=0.75, label=label)
 
 St, dSt, eff = np.genfromtxt('data/efficiency_shm.csv', skip_header=1).T
-for ax in [ax2, ax3]: ax.plot(dSt, eff, c='k', lw=0.75, label='$\infty$')
+for ax in [ax2, ax3]:
+    ax.plot(dSt, eff, c='k', lw=0.75, label='$\infty$')
+    ax.plot(St_cross, eff_cross, 'k--')
 St = np.concatenate([[0.25], St])
 eff = np.concatenate([[0], eff])
 ax1.plot(St, eff, c='k', lw=0.75, label='$\infty$')
@@ -99,30 +101,33 @@ for ax in [ax2, ax3]:
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_ylim([1e-5, 0.5])
+    ax.set_xlim([1e-5, 1])
+
+ax3.legend(loc='upper left', title='Re', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
 
 f = lambda x,c: c*x**0.5
-#x, c = 1e-4, 5e-3
-x, c = 1e-4, 0.6
 for ax in [ax2, ax3]:
-    annotation.slope_marker((x, f(x, c)), (1, 2), invert=True, ax=ax,
+    x, c = 2e-5, 5e-3
+    #x, c = 1e-4, 0.6
+    annotation.slope_marker((x, f(x, c)), (1, 2), invert=False, ax=ax,
                             poly_kwargs=dict(ec='black', fill=False, lw=0.5),
                             text_kwargs=dict(fontsize=8))
 
-    x, y = np.average(St_cross[:2]), np.average(eff_cross[:2])
+    x, y = np.average(St_cross[-2:]), np.average(eff_cross[-2:])
     ax.annotate('$\lambda = \mathrm{Re}^{-1/2}$', size=8,
-                 xytext=(1.5*x, 0.25*y), xy=(x, y),
+                 xytext=(1.5*x, 0.2*y), xy=(x, y),
                  arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='-'))
 
-    x, y = 3e-2, 1e-2
-    ax.annotate('inviscid\nscaling', size=8, va='center',
-                 xytext=(5*x, y), xy=(x, y),
+    x, y = 5e-2, 1e-2
+    ax.annotate('inviscid\nscaling', size=8, va='center', ha='center',
+                 xytext=(7*x, y), xy=(x, y),
                  arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
 
-for ax,figsize in zip([ax2, ax3], [figsize1, figsize2]):
-    inset_width = 0.3
+for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
+                                         [0.05, 0.035], [0.3, 0.225]):
+    #inset_width = 0.3
     aspect = figsize[1] / figsize[0]
-    gap = 0.065
-    #inset = ax2.inset_axes([1 - inset_width - gap*aspect, 1-gap - inset_width, inset_width, inset_width])
+    #inset = ax.inset_axes([gap*aspect, 1-gap - inset_width, inset_width, inset_width])
     inset = ax.inset_axes([1 - inset_width - gap*aspect, gap, inset_width, inset_width])
 
     Re,Stc1 = np.array([(k,v) for k,v in Stc.items()]).T
