@@ -196,7 +196,7 @@ class PlanarFlowField:
         _, _, collides = self.trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, **kwargs):
+    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, return_bounds=False, **kwargs):
         """Estimate efficiency of point particle capture.
 
         Args:
@@ -215,8 +215,10 @@ class PlanarFlowField:
             return 0
 
         ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet)
-        yestimate = 0.5 * (ylow + yhigh)
-        return 2*yestimate # capture efficiency covers both +ve and -ve y, so x2
+        if return_bounds: return ylow, yhigh
+        else:
+            yestimate = 0.5 * (ylow + yhigh)
+            return 2*yestimate # capture efficiency covers both +ve and -ve y, so x2
 
     def on_axis_eom(self, x, u, St):
         """Equation of motion for massive particle immersed in flow field approaching on-axis."""

@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from scipy.integrate import solve_ivp
 
 try: from .planar import PlanarFlowField
 except: from planar import PlanarFlowField

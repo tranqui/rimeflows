@@ -39,15 +39,15 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
     while xguess < xupper:
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: sys.stderr.write('initial refinement: [%.4f %.4f] guess=%.4f\n' % (xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('initial refinement: [%.4g %.4g] guess=%.4g\n' % (xlower, xupper, xguess))
         xguess *= 2
 
     for i in range(niters):
         xguess = 0.5 * (xlower + xupper)
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: sys.stderr.write('refining %d/%d: [%.4f %.4f] guess=%.4f\n' % (i+1, niters, xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('refining %d/%d: [%.4g %.4g] guess=%.4g\n' % (i+1, niters, xlower, xupper, xguess))
 
-    if not quiet: sys.stderr.write('best guess: %.8f\n' % (0.5*(xlower + xupper)))
+    if not quiet: sys.stderr.write('best guess: %.8g\n' % (0.5*(xlower + xupper)))
 
     return xlower, xupper

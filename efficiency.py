@@ -43,7 +43,7 @@ flow = flow_module.FlowField(*args.flowparams)
 
 if args.x is None: args.x = flow.default_starting_distance
 
-Stc = flow.critical_stokes(args.x, niters=args.niters)
+Stc = flow.critical_stokes(args.x, tmax=args.tmax, max_step=args.maxstep, niters=args.niters)
 
 print('# {:^16} {:^16} {:^16}'.format('St', 'St-Stc', 'efficiency'))
 args.stokes[-1] = int(args.stokes[-1])
