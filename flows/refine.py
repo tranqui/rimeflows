@@ -17,7 +17,7 @@
 import sys
 import numpy as np
 
-def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
+def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True, message_header=''):
     """Refine location of transition of boolean from True to False.
 
     Args:
@@ -26,6 +26,7 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
         xmin: initial lower bound for sign change.
         xmax: initial upper bound for sign change.
         quiet: if True, will suppress iteration updates.
+        message_header: preface to iteration updates if not quiet.
     Returns:
         Lower and upper bounds for where transition occurs.
     """
@@ -39,15 +40,15 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True):
     while xguess < xupper:
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: sys.stderr.write('initial refinement: [%.4g %.4g] guess=%.4g\n' % (xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('{} initial refinement: [{:.4g} {:.4g}] guess={:.4g}\n'.format(message_header, xlower, xupper, xguess))
         xguess *= 2
 
     for i in range(niters):
         xguess = 0.5 * (xlower + xupper)
         if f(xguess): xlower = xguess
         else: xupper = xguess
-        if not quiet: sys.stderr.write('refining %d/%d: [%.4g %.4g] guess=%.4g\n' % (i+1, niters, xlower, xupper, xguess))
+        if not quiet: sys.stderr.write('{} refining {}/{}: [{:.4g} {:.4g}] guess={:.4g}\n'.format(message_header, i+1, niters, xlower, xupper, xguess))
 
-    if not quiet: sys.stderr.write('best guess: %.8g\n' % (0.5*(xlower + xupper)))
+    if not quiet: sys.stderr.write('{} best guess: {:.8g}\n'.format(message_header, 0.5*(xlower + xupper)))
 
     return xlower, xupper

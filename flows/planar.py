@@ -27,7 +27,7 @@ class OnAxisFlow:
     def u(self, x):
         return self.full_flow.u(x, 0)
 
-    def trajectory(self, r0, St, step=1e-12, atol=1e-12, rtol=1e-12, tmax=1e2, xmin=-5, xmax=5, vmin=-5, vmax=5):
+    def trajectory(self, r0, St, step=1e-12, atol=1e-12, rtol=1e-12, tmax=1e2, max_step=np.inf, xmin=-5, xmax=5, vmin=-5, vmax=5):
         terminate = lambda t,r: r[0] < xmax and r[0] > xmin and r[1] < vmax and r[1] > vmin
         terminate.terminal = True
         terminate.direction = -1
@@ -35,7 +35,7 @@ class OnAxisFlow:
         xp = lambda x,v: v
         vp = lambda x,v: (self.u(x) - v)/St
         rp = lambda t,r: [xp(*r), vp(*r)]
-        return integrate.solve_ivp(rp, (0, tmax), r0, first_step=step, atol=atol, rtol=rtol, dense_output=True, events=terminate)
+        return integrate.solve_ivp(rp, (0, tmax), r0, first_step=step, atol=atol, rtol=rtol, max_step=max_step, dense_output=True, events=terminate)
 
     def streamline(self, x0, v0, St=1, tmax=1e2, N=2000, **kwargs):
         r0 = np.array([x0, v0])
@@ -196,7 +196,7 @@ class PlanarFlowField:
         _, _, collides = self.trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, return_bounds=False, **kwargs):
+    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, return_bounds=False, message_header='', **kwargs):
         """Estimate efficiency of point particle capture.
 
         Args:
@@ -204,6 +204,7 @@ class PlanarFlowField:
             St: value of Stokes number we are evaluating efficiency at.
             niters: number of refinement iterations to estimate Stokes number.
             quiet: if True, will suppress iteration updates.
+            message_header: preface to iteration updates if not quiet.
         Returns:
             Efficiency of particle capture efficiency.
         """
@@ -214,7 +215,7 @@ class PlanarFlowField:
             if not quiet: print('on-axis does not lead to collision, so efficiency is zero!')
             return 0
 
-        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet)
+        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
         if return_bounds: return ylow, yhigh
         else:
             yestimate = 0.5 * (ylow + yhigh)
@@ -285,7 +286,7 @@ class PlanarFlowField:
         _, _, collides = self.on_axis_trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def critical_stokes(self, x, niters=50, quiet=True, *args, **kwargs):
+    def critical_stokes(self, x, niters=50, quiet=True, *args, message_header='', **kwargs):
         """Estimate critical Stokes number above which point particle capture occurs.
 
         This requires solving the on-axis problem only.
@@ -294,8 +295,9 @@ class PlanarFlowField:
             x: initial condition for x.
             niters: number of refinement iterations to estimate Stokes number.
             quiet: if True, will suppress iteration updates.
+            message_header: preface to iteration updates if not quiet.
         """
 
         collides = lambda St: not self.on_axis_does_collide(x, St, *args, **kwargs)
-        Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet)
+        Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
         return 0.5 * (Stc_low + Stc_high)
