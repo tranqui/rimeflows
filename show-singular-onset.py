@@ -19,21 +19,26 @@ def adjust_lightness(color, amount):
     return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
 
 cmap = plt.get_cmap('turbo_r')
-paths = natsorted(glob('data/efficiency_hiemenz*.csv'))
-
-Stc = {}
+paths_hiemenz = natsorted(glob('data/efficiency_hiemenz*.csv'))
+paths_power = glob('data/efficiency_power*.csv')
+indices = np.argsort([float(p.split('m=')[-1].split('.csv')[0]) for p in paths_power])
+paths_power = [paths_power[i] for i in indices]
+for p in paths_power: print(p)
+# paths_power = natsorted(glob('data/efficiency_power*.csv'))
+# for p in paths_power: print(p)
 
 figsize1 = (3.375, 2.1)
 figsize2 = (3.375, 2.5)
 fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(figsize1[0], 2*figsize1[1]), constrained_layout=True)
 plt.figure(figsize=figsize2)
 ax3 = plt.gca()
+plt.figure(figsize=figsize2)
+ax4 = plt.gca()
 
 St_cross= []
 eff_cross = []
-
-first = True
-for i, path in enumerate(paths):
+Stc_hiemenz = {}
+for i, path in enumerate(paths_hiemenz):
 
     Re_str = path.split('.csv')[0].split('Re=')[-1]
     Re = float(Re_str) if Re_str != 'inft' else np.inf
@@ -42,7 +47,7 @@ for i, path in enumerate(paths):
 
     St, dSt, eff = np.genfromtxt(path, skip_header=1).T
 
-    Stc[Re] = np.average(St - dSt)
+    Stc_hiemenz[Re] = np.average(St - dSt)
 
     boundary_layer_thickness = 1 / np.sqrt(Re)
     f = interpolate.interp1d(St, eff)
@@ -52,28 +57,44 @@ for i, path in enumerate(paths):
         eff_cross += [eff[guess]]
         #print('{:.1g} {:.4g}'.format(Re, boundary_layer_thickness), St_cross[-1], eff_cross[-1])
 
-    c = cmap(i/(len(paths)-1))
+    c = cmap(i/(len(paths_hiemenz)-1))
      # default colour scheme is very bright which obscures some of the lighter colours  (esp. greens)
     c = adjust_lightness(c, 0.75)
 
-    label = Re_str
-    if first:
-        #label = '$\mathrm{Re} = %s$' % label
-        first = False
+    for ax in [ax2, ax3]: ax.plot(dSt, eff, c=c, lw=0.75, label=Re_str)
 
-    for ax in [ax2, ax3]: ax.plot(dSt, eff, c=c, lw=0.75, label=label)
-
-    St = np.concatenate([[Stc[Re]], St])
+    St = np.concatenate([[Stc_hiemenz[Re]], St])
     eff = np.concatenate([[0], eff])
-    ax1.plot(St, eff, c=c, lw=0.75, label=label)
+    ax1.plot(St, eff, c=c, lw=0.75, label=Re_str)
 
 St, dSt, eff = np.genfromtxt('data/efficiency_shm.csv', skip_header=1).T
 for ax in [ax2, ax3]:
     ax.plot(dSt, eff, c='k', lw=0.75, label='$\infty$')
     ax.plot(St_cross, eff_cross, 'k--')
+ax4.plot(dSt, eff, c='k', lw=0.75, label='1.0')
 St = np.concatenate([[0.25], St])
 eff = np.concatenate([[0], eff])
 ax1.plot(St, eff, c='k', lw=0.75, label='$\infty$')
+
+Stc_power = {}
+Stc_power[1] = 0.25
+first = True
+for i, path in enumerate(paths_power):
+    m_str = path.split('.csv')[0].split('m=')[-1]
+    m = float(m_str) if m_str != 'inft' else np.inf
+
+    St, dSt, eff = np.genfromtxt(path, skip_header=1).T
+
+    Stc_power[m] = np.average(St - dSt)
+
+    c = cmap(i/(len(paths_power)-1))
+     # default colour scheme is very bright which obscures some of the lighter colours  (esp. greens)
+    c = adjust_lightness(c, 0.75)
+
+    ax4.plot(dSt, eff, c=c, lw=0.75, label=m_str)
+
+ax4.set_xscale('log')
+ax4.set_yscale('log')
 
 # for ax in [ax1, ax2]:
 #     #ax.legend(loc='upper left', title='Re', title_fontsize=8, alignment='left', ncol=2, fontsize=8, borderpad=0)
@@ -86,7 +107,7 @@ ax1.plot(St, eff, c='k', lw=0.75, label='$\infty$')
 #     ax.set_xscale('log')
 #     ax.set_yscale('log')
 
-for ax in [ax1, ax2, ax3]:
+for ax in [ax1, ax2, ax3, ax4]:
     ax.set_ylabel('efficiency $\lambda = 2y_c$')
 
 ax1.set_xlabel('$\mathrm{St}$')
@@ -103,7 +124,14 @@ for ax in [ax2, ax3]:
     ax.set_ylim([1e-5, 0.5])
     ax.set_xlim([1e-5, 1])
 
+ax4.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
+ax4.set_xscale('log')
+ax4.set_yscale('log')
+ax4.set_xlim([1e-7, 1])
+ax4.set_ylim([1e-7, 1])
+
 ax3.legend(loc='upper left', title='Re', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
+ax4.legend(loc='upper left', title='$m$', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
 
 f = lambda x,c: c*x**0.5
 for ax in [ax2, ax3]:
@@ -113,15 +141,25 @@ for ax in [ax2, ax3]:
                             poly_kwargs=dict(ec='black', fill=False, lw=0.5),
                             text_kwargs=dict(fontsize=8))
 
-    x, y = np.average(St_cross[-2:]), np.average(eff_cross[-2:])
-    ax.annotate('$\lambda = \mathrm{Re}^{-1/2}$', size=8,
-                 xytext=(1.5*x, 0.2*y), xy=(x, y),
-                 arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='-'))
-
     x, y = 5e-2, 1e-2
     ax.annotate('inviscid\nscaling', size=8, va='center', ha='center',
                  xytext=(7*x, y), xy=(x, y),
                  arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
+
+x, c = 2e-7, 5e-3
+annotation.slope_marker((x, f(x, c)), (1, 2), invert=False, ax=ax4,
+                        poly_kwargs=dict(ec='black', fill=False, lw=0.5),
+                        text_kwargs=dict(fontsize=8))
+x, y = 1.5e-2, 1e-4
+ax4.annotate('inviscid\nscaling', size=8, va='center', ha='center',
+             xytext=(20*x, y), xy=(x, y),
+             arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
+
+for ax in [ax2, ax3]:
+    x, y = np.average(St_cross[-2:]), np.average(eff_cross[-2:])
+    ax.annotate('$\lambda = \mathrm{Re}^{-1/2}$', size=8,
+                 xytext=(1.5*x, 0.2*y), xy=(x, y),
+                 arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='-'))
 
 for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
                                          [0.05, 0.035], [0.3, 0.225]):
@@ -130,7 +168,7 @@ for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
     #inset = ax.inset_axes([gap*aspect, 1-gap - inset_width, inset_width, inset_width])
     inset = ax.inset_axes([1 - inset_width - gap*aspect, gap, inset_width, inset_width])
 
-    Re,Stc1 = np.array([(k,v) for k,v in Stc.items()]).T
+    Re,Stc1 = np.array([(k,v) for k,v in Stc_hiemenz.items()]).T
     inset.semilogx(Re, Stc1)
     inset.set_ylim([0, 1])
     inset.axhline(y=0.25, ls='dotted')
@@ -148,6 +186,35 @@ for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
     inset.set_yticklabels(labels, fontsize=8)
 
     inset.set_xlabel('$\mathrm{Re}$', labelpad=-3, fontsize=8)
+    inset.set_ylabel('$\mathrm{St}_\mathrm{c}$', labelpad=-3, fontsize=8)
+
+    inset.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False)
+    inset.xaxis.set_label_position('top')
+
+figsize = figsize2
+ax = ax4
+inset_width = 0.225
+if True:
+    #inset_width = 0.3
+    aspect = figsize[1] / figsize[0]
+    #inset = ax.inset_axes([gap*aspect, 1-gap - inset_width, inset_width, inset_width])
+    inset = ax.inset_axes([1 - inset_width - gap*aspect, gap, inset_width, inset_width])
+
+    m,Stc1 = np.array([(k,v) for k,v in Stc_power.items()]).T
+    inset.plot(m, Stc1)
+    inset.set_xlim([1, 2])
+    inset.set_ylim([0, 0.6])
+    inset.axhline(y=0.25, ls='dotted')
+
+    inset.set_xticks([1,1.5,2])
+    labels = inset.get_xticklabels()
+    labels[1:-1] = ['' for _ in labels[1:-1]]
+    inset.set_xticklabels(labels, fontsize=8)
+
+    inset.set_yticks([0, 0.25, 0.5])
+    inset.set_yticklabels(['0', '', '0.5'], fontsize=8)
+
+    inset.set_xlabel('$m$', labelpad=-3, fontsize=8)
     inset.set_ylabel('$\mathrm{St}_\mathrm{c}$', labelpad=-3, fontsize=8)
 
     inset.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False)
