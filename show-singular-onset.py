@@ -48,6 +48,7 @@ for i, path in enumerate(paths_hiemenz):
     St, dSt, eff = np.genfromtxt(path, skip_header=1).T
 
     Stc_hiemenz[Re] = np.average(St - dSt)
+    if Re in [5, 50, 500, 2000, 5000]: continue
 
     boundary_layer_thickness = 1 / np.sqrt(Re)
     f = interpolate.interp1d(St, eff)
@@ -70,7 +71,7 @@ for i, path in enumerate(paths_hiemenz):
 St, dSt, eff = np.genfromtxt('data/efficiency_shm.csv', skip_header=1).T
 for ax in [ax2, ax3]:
     ax.plot(dSt, eff, c='k', lw=0.75, label='$\infty$')
-    ax.plot(St_cross, eff_cross, 'k--')
+    cross_plot, = ax.plot(St_cross, eff_cross, 'k--')
 ax4.plot(dSt, eff, c='k', lw=0.75, label='1.0')
 St = np.concatenate([[0.25], St])
 eff = np.concatenate([[0], eff])
@@ -130,14 +131,22 @@ ax4.set_yscale('log')
 ax4.set_xlim([1e-7, 1])
 ax4.set_ylim([1e-7, 1])
 
-ax3.legend(loc='upper left', title='Re', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
+leg3 = ax3.legend(loc='upper left', title='Re', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
 ax4.legend(loc='upper left', title='$m$', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
+
+St, dSt, eff = np.genfromtxt('data/efficiency_kuwabara_alpha=0.15_2.csv', skip_header=1).T
+ax1.plot(St, eff, '-.')
+for ax in [ax2, ax3]:
+    kuwabara_plot, = ax.plot(dSt, eff, '-.', lw=0.75)
+    ax.legend([kuwabara_plot, cross_plot], [r'$\mathrm{Re}=0$ (Kuwabara $\alpha=0.15$)', r'$\lambda = \mathrm{Re}^{-1/2}$'],
+              loc='lower left', fontsize=6, borderpad=-0.25, labelspacing=0., handlelength=2.1)
+ax3.add_artist(leg3)
 
 f = lambda x,c: c*x**0.5
 for ax in [ax2, ax3]:
-    x, c = 2e-5, 5e-3
-    #x, c = 1e-4, 0.6
-    annotation.slope_marker((x, f(x, c)), (1, 2), invert=False, ax=ax,
+    #x, c = 2e-5, 5e-3
+    x, c = 1e-4, 0.6
+    annotation.slope_marker((x, f(x, c)), (1, 2), invert=True, ax=ax,
                             poly_kwargs=dict(ec='black', fill=False, lw=0.5),
                             text_kwargs=dict(fontsize=8))
 
@@ -154,12 +163,6 @@ x, y = 1.5e-2, 1e-4
 ax4.annotate('inviscid\nscaling', size=8, va='center', ha='center',
              xytext=(20*x, y), xy=(x, y),
              arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
-
-for ax in [ax2, ax3]:
-    x, y = np.average(St_cross[-2:]), np.average(eff_cross[-2:])
-    ax.annotate('$\lambda = \mathrm{Re}^{-1/2}$', size=8,
-                 xytext=(1.5*x, 0.2*y), xy=(x, y),
-                 arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='-'))
 
 for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
                                          [0.05, 0.035], [0.3, 0.225]):

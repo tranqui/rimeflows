@@ -229,7 +229,7 @@ class CylindricalFlowField:
         _, _, collides = self.trajectory_cartesian(*args, return_collision=True, **kwargs)
         return collides
 
-    def capture_efficiency(self, x, St, niters=25, cartesian=False, quiet=True, *args, **kwargs):
+    def capture_efficiency(self, x, St, niters=25, cartesian=False, quiet=True, *args, message_header='', **kwargs):
         """Estimate efficiency of point particle capture.
 
         Args:
@@ -238,6 +238,7 @@ class CylindricalFlowField:
             cartesian: if True, will assume initial conditions are specified in Cartesian coordinates, otherwise polars.
             niters: number of refinement iterations to estimate Stokes number.
             quiet: if True, will suppress iteration updates.
+            message_header: preface to iteration updates if not quiet.
         Returns:
             Efficiency of particle capture efficiency.
         """
@@ -254,7 +255,7 @@ class CylindricalFlowField:
             if not quiet: print('on-axis does not lead to collision, so efficiency is zero!')
             return 0
 
-        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet)
+        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
         yestimate = 0.5 * (ylow + yhigh)
         return 2*yestimate # capture efficiency covers both +ve and -ve y, so x2
 
@@ -323,7 +324,7 @@ class CylindricalFlowField:
         _, _, collides = self.on_axis_trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def critical_stokes(self, x, niters=25, quiet=True, *args, **kwargs):
+    def critical_stokes(self, x, niters=25, quiet=True, *args, message_header='', **kwargs):
         """Estimate critical Stokes number above which point particle capture occurs.
 
         This requires solving the on-axis problem only.
@@ -332,8 +333,9 @@ class CylindricalFlowField:
             x: initial condition for x.
             niters: number of refinement iterations to estimate Stokes number.
             quiet: if True, will suppress iteration updates.
+            message_header: preface to iteration updates if not quiet.
         """
 
         collides = lambda St: not self.on_axis_does_collide(x, St, *args, **kwargs)
-        Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet)
+        Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
         return 0.5 * (Stc_low + Stc_high)

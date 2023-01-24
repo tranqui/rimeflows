@@ -201,6 +201,7 @@ if args.y is None:
         x = x[select]
         y = y[select]
 
+    ax.plot(-1, 0, 'o', mfc='w', ms=2, mew=0.25, zorder=100) # forward stagnation point
     ax.plot(x, y, '--', lw=args.trajectory_line_width, c=args.critical_trajectory_colour, zorder=1)
     ax.plot(x, -y, '--', lw=args.trajectory_line_width, c=args.critical_trajectory_colour, zorder=1)
     if args.colliding_manifold:
