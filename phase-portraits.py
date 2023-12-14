@@ -19,6 +19,7 @@ from scipy import interpolate, optimize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from arrows import add_arrow
 plt.style.use('figstyle.mplstyle')
+plt.rcParams['figure.constrained_layout.use'] = False
 
 from palettes import PurpleGold as palette
 #from palettes import BlueRed as palette
@@ -28,17 +29,22 @@ parser = argparse.ArgumentParser(description='show phase portraits of toy models
 parser.add_argument('-o', '--output', type=str, help='output plot to file (e.g. pdf or png)')
 args = parser.parse_args()
 
-from flows import stokes, shm
+from flows import stokes, shm, power
 stokes = stokes.FlowField().on_axis
 shm = shm.FlowField().on_axis
 
 figsize = 3.375 # (inches)
-fig, axes = plt.subplots(nrows=4, figsize=(figsize, 1.5*figsize), gridspec_kw={'hspace': 0})
+fig, big_axes = plt.subplots(ncols=3, figsize=(2*figsize, figsize), gridspec_kw={'hspace': 0})
 
-ax1, ax2, ax3, ax4 = axes
+axes = []
+for ax in big_axes:
+    div = make_axes_locatable(ax)
+    new_ax = div.append_axes("bottom", size="100%", pad=0)#, sharex=ax)
+    axes += [(ax, new_ax)]
 
-# div = make_axes_locatable(ax3)
-# ax2 = div.append_axes("top", size="100%", pad=0.05)
+axes = np.array(axes).T
+ax1, ax2, ax3, ax4, ax5, ax6 = axes.T.flatten()
+
 # div = make_axes_locatable(ax1)
 # ax4 = div.append_axes("top", size="100%", pad=0.05)
 # axes = [ax1, ax2, ax3, ax4]
@@ -201,6 +207,64 @@ ax4.fill_between([xmin, xmax], vmin, vmax, facecolor=palette.colliding_manifold_
 ax4.set_xlim([xmin, xmax])
 ax4.set_ylim([vmin, vmax])
 
+
+St = 1
+xmin = -0.75
+xmax = 5
+vmin = -2
+vmax = 2
+m = 10
+v0 = 0
+
+for m,ax in zip([1.5, 0.5], [ax5,ax6]):
+    flow = power.FlowField(m).on_axis
+
+    x, v, (xc, vc) = flow.separatrix(St=St, max_step=max_step, tmax=tmax, N=N, return_critical_point=True)
+    if np.abs(xc) < 1e-8: xc, vc = 0, 0
+    separatrix_x = np.max(x)
+
+    ax.plot(0, 0, 'o', c=palette.separatrix_colour, mfc='w', zorder=20)
+    ax.fill_between([xmin, xmax], vmin, vmax, facecolor=palette.colliding_manifold_colour, zorder=-10)
+
+    x_range = np.linspace(xmin, xmax, 60)
+
+    if xc > 0:
+        #ax.plot(x, v, c='k', lw=0.5)
+        ax.plot(xc, vc, 'o', c=palette.separatrix_colour, mfc=palette.critical_trajectory_colour, zorder=20)
+        ax.fill_between(x[x > 0], 0, v[x > 0], facecolor=palette.noncolliding_manifold_colour, zorder=-5)
+        ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=palette.noncolliding_manifold_colour, zorder=-5)
+
+        eps = 1e-3
+        dx = x_range[1] - x_range[0]
+        delta_x = np.arange(0, m*(xmax - xmin), dx)[1:]
+        central_x = separatrix_x + eps
+        x_range = np.hstack((central_x - delta_x, central_x, central_x + delta_x))
+
+    for x0 in x_range:
+        # print(x0)
+        x, v = flow.streamline(x0, v0, St=St, max_step=max_step, tmax=tmax, N=N,
+                               xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
+
+        if xc == 0: c = palette.colliding_trajectory_colour
+        else:
+            if x0 < 0 or x0 > separatrix_x: c = palette.colliding_trajectory_colour
+            else: c = palette.noncolliding_trajectory_colour
+
+        pl, = ax.plot(x, v, lw=0.5, c=c)
+
+        add_arrow(pl, y=0.4)
+        add_arrow(pl, y=0.1, eps=1e-6)
+        add_arrow(pl, y=-0.35)
+
+    x = np.linspace(0, xmax, 1000)
+    v = flow.nullcline(x)
+    ax.plot(x, v, '--', c=palette.nullcline_colour)
+
+    ax.set_xlim([-0.25, 1])
+    ax.set_ylim([-0.5, 0.5])
+    ax.set_yticks(np.arange(-0.4, 0.41, 0.2))
+
+
 for ax in [ax3, ax4]:
     ax.plot(0, 0, 'o', mfc='w', c=palette.separatrix_colour, zorder=20)
 
@@ -209,15 +273,18 @@ for ax in [ax3, ax4]:
     x = np.linspace(xmin, xmax, 10)
     ax.plot(x, -x, '--', c=palette.nullcline_colour)
 
-for ax in axes:
+for ax in axes[-1]:
+    ax.set_xlabel('$x$')
+
+for ax in axes.flatten():
     ax.fill_between([-1e3, 0], -1e3, 1e3, facecolor='black', alpha=0.125, zorder=10)
     ax.axvline(x=0, lw=0.5)
 
-label = ax1.text( 0.325, 0.5, 'noncolliding\ntrajectories', fontsize=8,
-                  bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label = ax1.text( 0.35, 0.8, 'noncolliding\ntrajectories', fontsize=6,
+                  bbox=bbox, ha='center', va='center', transform=ax1.transAxes)
 label.set_in_layout(False)
-label = ax1.text( 1.15, 0.5, 'colliding\ntrajectories', fontsize=8,
-                  bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label = ax1.text( 0.8, 0.8, 'colliding\ntrajectories', fontsize=6,
+                  bbox=bbox, ha='center', va='center', transform=ax1.transAxes)
 label.set_in_layout(False)
 #ax1.text(-0.06, -0.45, 'collision at\nfinite $t$', fontsize=8, rotation=90,
 #         horizontalalignment='center', verticalalignment='center')
@@ -250,30 +317,44 @@ label.set_in_layout(False)
 #              fontsize=10, horizontalalignment='center', verticalalignment='top',
 #              bbox=bbox, arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='-'))
 
-label = plt.text(0.9, 0.12, r'$\mathrm{St} = 1$', transform=ax1.transAxes,
+label = plt.text(0.85, 0.12, r'$\mathrm{St} = 1$', transform=ax1.transAxes,
                  fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
 label.set_in_layout(False)
-label = plt.text(0.9, 0.12, r'$\mathrm{St} > 1$', transform=ax2.transAxes,
-                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
-label.set_in_layout(False)
-
-label = plt.text(0.9, 0.12, r'$\mathrm{St} < \frac{1}{4}$', transform=ax3.transAxes,
-                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
-label.set_in_layout(False)
-label = plt.text(0.9, 0.12, r'$\mathrm{St} > \frac{1}{4}$', transform=ax4.transAxes,
+label = plt.text(0.85, 0.12, r'$\mathrm{St} > 1$', transform=ax2.transAxes,
                  fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
 label.set_in_layout(False)
 
-for ax,l in zip(axes, 'abcd'):
-    label = plt.text(-0.15, 0.95, (r'\textbf{%s}' % l), transform=ax.transAxes,
-                     fontsize=18, horizontalalignment='left', verticalalignment='top')
+label = plt.text(0.85, 0.12, r'$\mathrm{St} < \frac{1}{4}$', transform=ax3.transAxes,
+                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label.set_in_layout(False)
+label = plt.text(0.85, 0.12, r'$\mathrm{St} > \frac{1}{4}$', transform=ax4.transAxes,
+                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label.set_in_layout(False)
+
+label = plt.text(0.85, 0.12, r'$m = \frac{3}{2}$', transform=ax5.transAxes,
+                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label.set_in_layout(False)
+label = plt.text(0.85, 0.12, r'$m = \frac{1}{2}$', transform=ax6.transAxes,
+                 fontsize=10, bbox=bbox, horizontalalignment='center', verticalalignment='center')
+label.set_in_layout(False)
+
+for ax,l in zip(axes.flatten(), 'acebdf'):
+    label = plt.text(-0.325, 0.8, (r'\textbf{%s}' % l), transform=ax.transAxes,
+                     fontsize=18, horizontalalignment='left', verticalalignment='bottom')
     label.set_in_layout(False)
 
-for ax in axes: ax.set_ylabel('$\dot{x}$')
-for ax in axes[:-1]: ax.set_xticklabels([])
-ax4.set_xlabel('$x$')
+for ax in axes.flatten(): ax.set_ylabel('$\dot{x}$')
+for ax in axes[0]: ax.set_xticklabels([])
+for ax in axes[-1]: ax.set_label('$x$')
 
-fig.tight_layout(h_pad=-0.1)
+plt.subplots_adjust(bottom=0.125, top=0.925, left=0.1, right=0.975, wspace=0.4)
+
+# Prevent overlap between ticks in top and bottom panels.
+ax2.set_yticks([-1, -0.5, 0, 0.5])
+
+ax1.set_title('$u = -x^2$')
+ax3.set_title('$u = -x$')
+ax5.set_title('$u = -|x|^m$, $\mathrm{St} = 1$')
 
 if args.output: plt.savefig(args.output, pad_inches=0.1)
 

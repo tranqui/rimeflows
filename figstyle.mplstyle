@@ -1,4 +1,4 @@
-lines.linewidth   : 1.0
+lines.linewidth   : 0.5
 lines.markeredgewidth  : 0.5
 lines.markersize  : 3
 font.family         : serif

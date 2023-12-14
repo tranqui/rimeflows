@@ -3,6 +3,7 @@
 import numpy as np, matplotlib.pyplot as plt
 from scipy import interpolate#, fsolve
 from mpltools import annotation
+plt.style.use('figstyle.mplstyle')
 
 from glob import glob
 from natsort import natsorted
@@ -30,10 +31,12 @@ for p in paths_power: print(p)
 figsize1 = (3.375, 2.1)
 figsize2 = (3.375, 2.5)
 fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(figsize1[0], 2*figsize1[1]), constrained_layout=True)
-plt.figure(figsize=figsize2)
-ax3 = plt.gca()
-plt.figure(figsize=figsize2)
-ax4 = plt.gca()
+fig2, (ax3, ax4) = plt.subplots(nrows=2, figsize=(figsize2[0], 2*figsize2[1]), constrained_layout=True, sharex=True, sharey=True, gridspec_kw={'hspace': 0})
+#fig2.subplots_adjust(hspace=0)
+# plt.figure(figsize=figsize2)
+# ax3 = plt.gca()
+# plt.figure(figsize=figsize2)
+# ax4 = plt.gca()
 
 St_cross= []
 eff_cross = []
@@ -118,18 +121,19 @@ ax1.legend(loc='lower right', title='Re', title_fontsize=8, alignment='center', 
 ax1.set_xlim([0, 2])
 ax1.set_ylim([0, 0.35])
 
-for ax in [ax2, ax3]:
+for ax in [ax2, ax4]:
     ax.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
+for ax in [ax2, ax3, ax4]:
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_ylim([1e-5, 0.5])
     ax.set_xlim([1e-5, 1])
 
-ax4.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
-ax4.set_xscale('log')
-ax4.set_yscale('log')
-ax4.set_xlim([1e-7, 1])
-ax4.set_ylim([1e-7, 1])
+# ax4.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
+# ax4.set_xscale('log')
+# ax4.set_yscale('log')
+# ax4.set_xlim([1e-7, 1])
+# ax4.set_ylim([1e-7, 1])
 
 leg3 = ax3.legend(loc='upper left', title='Re', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
 ax4.legend(loc='upper left', title='$m$', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
@@ -143,7 +147,7 @@ for ax in [ax2, ax3]:
 ax3.add_artist(leg3)
 
 f = lambda x,c: c*x**0.5
-for ax in [ax2, ax3]:
+for ax in [ax2, ax3, ax4]:
     #x, c = 2e-5, 5e-3
     x, c = 1e-4, 0.6
     annotation.slope_marker((x, f(x, c)), (1, 2), invert=True, ax=ax,
@@ -155,17 +159,17 @@ for ax in [ax2, ax3]:
                  xytext=(7*x, y), xy=(x, y),
                  arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
 
-x, c = 2e-7, 5e-3
-annotation.slope_marker((x, f(x, c)), (1, 2), invert=False, ax=ax4,
-                        poly_kwargs=dict(ec='black', fill=False, lw=0.5),
-                        text_kwargs=dict(fontsize=8))
-x, y = 1.5e-2, 1e-4
-ax4.annotate('inviscid\nscaling', size=8, va='center', ha='center',
-             xytext=(20*x, y), xy=(x, y),
-             arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
+# x, c = 2e-7, 5e-3
+# annotation.slope_marker((x, f(x, c)), (1, 2), invert=False, ax=ax4,
+#                         poly_kwargs=dict(ec='black', fill=False, lw=0.5),
+#                         text_kwargs=dict(fontsize=8))
+# x, y = 1.5e-2, 1e-4
+# ax4.annotate('inviscid\nscaling', size=8, va='center', ha='center',
+#              xytext=(20*x, y), xy=(x, y),
+#              arrowprops=dict(facecolor='black', lw=0.5, arrowstyle='->'))
 
 for ax, figsize, gap, inset_width in zip([ax2, ax3], [figsize1, figsize2],
-                                         [0.05, 0.035], [0.3, 0.225]):
+                                         [0.05, 0.04], [0.3, 0.225]):
     #inset_width = 0.3
     aspect = figsize[1] / figsize[0]
     #inset = ax.inset_axes([gap*aspect, 1-gap - inset_width, inset_width, inset_width])
@@ -229,4 +233,12 @@ for ax, letter in zip([ax1, ax2], 'ab'):
                      fontsize=fontsize, horizontalalignment=ha, verticalalignment=va)
     label.set_in_layout(False)
 
+x, y, fontsize, ha, va = -0.175, 0.9, 18, 'left', 'bottom'
+for ax, letter in zip([ax3, ax4], 'ab'):
+    label = ax.text(x, y, r'\textbf{%s}' % letter, transform=ax.transAxes, zorder=20,
+                     fontsize=fontsize, horizontalalignment=ha, verticalalignment=va)
+    label.set_in_layout(False)
+
+plt.savefig('singular-onset.pdf')
+plt.savefig('singular-onset.png')
 plt.show()
