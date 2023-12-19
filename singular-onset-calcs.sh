@@ -1,3 +1,17 @@
+mlist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 2, 50))))")
+echo "" > data/Stc_power_m.csv
+for m in $mlist; do
+    echo $m
+    ./critical-stokes.py $m -f power --maxstep 1e-2 --tmax=1e2 >> data/Stc_power_m.csv
+done
+
+Relist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 1e8, 50))))")
+echo "" > data/Stc_hiemenz.csv
+for Re in $Relist; do
+    echo $Re
+    ./critical-stokes.py $Re -f hiemenz >> data/Stc_hiemenz.csv
+done
+
 for m in 1.05 1.10 1.15 1.20 1.25 1.30 1.50 2.00; do
     ./efficiency.py $m -v -f power -s 1e-7 1 100 --maxstep 1e-2 --tmax 1e2 > data/efficiency_power_m=$m.csv &
 done

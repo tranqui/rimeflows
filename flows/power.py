@@ -30,6 +30,10 @@ class FlowField(PlanarFlowField):
     def v(self, x, y):
         return self.m*self.k * np.abs(x)**(self.m-1) * y
 
+    def critical_stokes(self, *args, **kwargs):
+        if self.m == 1: return 0.25/self.k
+        else: return PlanarFlowField.critical_stokes(self, *args, **kwargs)
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 

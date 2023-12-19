@@ -104,6 +104,7 @@ leg1 = ax1.legend(loc='upper left', title='Re', title_fontsize=8, alignment='cen
 ax2.legend(loc='upper left', title='$m$', title_fontsize=8, alignment='center', ncol=3, fontsize=8, borderpad=0, labelspacing=0., handlelength=1.)
 
 St, dSt, eff = np.genfromtxt('data/efficiency_kuwabara_alpha=0.15_2.csv', skip_header=1).T
+Stc_kuwabara = St[0] - dSt[0]
 kuwabara_plot, = ax1.plot(dSt, eff, '-.', lw=lw)
 ax1.legend([kuwabara_plot, cross_plot],
            [r'$\mathrm{Re}=0$ (Kuwabara $\alpha=0.15$)', r'$\lambda = \mathrm{Re}^{-1/2}$'],
@@ -126,11 +127,14 @@ for ax in [ax1, ax2]:
 
 # Show the critical Stokes numbers for the Hiemenz flow (ax3) and the power law model (ax4)
 
-Re,Stc1 = np.array([(k,v) for k,v in Stc_hiemenz.items()]).T
+Re,Stc1 = np.genfromtxt('data/Stc_hiemenz.csv').T
 ax3.semilogx(Re, Stc1, lw=lw)
 ax3.set_ylim([0, 1])
-ax3.axhline(y=0.25, ls='dotted')
 ax3.set_xlim([1, 1e8])
+ax3.axhline(y=0.25, ls='dotted')
+ax3.text(1e2, 0.25, 'inviscid limit', ha='center', va='bottom', fontsize=8)
+ax3.axhline(y=Stc_kuwabara, ls='-.')
+ax3.text(2e3, Stc_kuwabara, r'Kuwabara $\alpha=0.15$ ($\mathrm{Re} = 0$)', ha='center', va='bottom', fontsize=8)
 
 xticks = np.geomspace(1, 1e8, 9)
 ax3.set_xticks(xticks)
@@ -138,11 +142,15 @@ labels = ax3.get_xticklabels()
 labels[1::2] = ['' for _ in labels[1::2]]
 ax3.set_xticklabels(labels)
 
-m,Stc1 = np.array([[(1,0)] + [(k,v) for k,v in Stc_power.items()]]).T
+m,Stc1 = np.concatenate([[(1,0)], np.genfromtxt('data/Stc_power_m.csv')]).T
 ax4.plot(m, Stc1, lw=lw)
 ax4.set_xlim([0, 2])
 ax4.set_ylim([0, 0.6])
 ax4.axhline(y=0.25, ls='dotted')
+ax4.text(0.5, 0.25, 'inviscid limit', ha='center', va='bottom', fontsize=8)
+
+# ax4.legend(loc='best')
+# ax4.axhline(y=0.25, ls='-.', label='inviscid limit')
 
 for ax in [ax3, ax4]: ax.set_ylabel('$\mathrm{St}_\mathrm{c}$')
 ax3.set_xlabel('$\mathrm{Re}$')
