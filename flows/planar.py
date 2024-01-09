@@ -115,9 +115,13 @@ class PlanarFlowField:
         """Equation of motion for inertialess particle immersed in flow field."""
         return self.u(x,y), self.v(x,y)
 
+    def collision(self, x, y):
+        """Function that changes sign to indicate when a collision occurs."""
+        return -x
+
     def trajectory(self, r0, St, xmax=None, ymax=5, return_collision=False,
                    tmax=1e2, max_step=np.inf, rtol=1e-12, atol=1e-12, **kwargs):
-        """Obtain trajectory for particle immersed in flow field (in polar coordinates).
+        """Obtain trajectory for particle immersed in flow field.
 
         Args:
             r0: initial condition (n-component vector, n=2 or 4).
@@ -149,7 +153,7 @@ class PlanarFlowField:
             else: assert len(r0) == 4
             eom = lambda t, x: self.eom(*x, St=St)
 
-        collide = lambda t, x: -x[0]
+        collide = lambda t, x: self.collision(*x)
         collide.terminal = True
 
         if xmax is None:
