@@ -41,10 +41,6 @@ The flow fields implemented are:
 * Hiemenz
 * ?
 
-The main flow fields are summarised with schematics and showing their collection efficiencies by running:
-
-    python schematics.py
-
 ### Bonus figures
 
 Bonus figure, showing transition from exp scaling to normal (square root) scaling of capture efficiency as initial conditions are rescaled in the inviscid flow case:
