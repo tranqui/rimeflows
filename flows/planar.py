@@ -89,7 +89,7 @@ class OnAxisFlow:
         v = np.concatenate([[0], v])
         return x, v
 
-class PlanarFlowField:
+class BasePlanarFlowField:
     @property
     def on_axis(self):
         return OnAxisFlow(self)
@@ -109,7 +109,7 @@ class PlanarFlowField:
 
     def eom(self, x, y, ux, uy, St):
         """Equation of motion for massive particle immersed in flow field."""
-        return ux, uy, uy**2 - (ux - self.u(x,y))/St, -2*ux*uy - (uy - self.v(x,y))/St
+        raise NotImplementedError
 
     def streamline_eom(self, x, y):
         """Equation of motion for inertialess particle immersed in flow field."""
@@ -305,3 +305,19 @@ class PlanarFlowField:
         collides = lambda St: not self.on_axis_does_collide(x, St, *args, **kwargs)
         Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
         return 0.5 * (Stc_low + Stc_high)
+
+# Specialisations for inertial and non-inertial reference frames.
+
+class PlanarFlowFieldInertial(BasePlanarFlowField):
+    def eom(self, x, y, ux, uy, St):
+        """Equation of motion for massive particle immersed in flow field with
+        no inertial forces."""
+        return ux, uy, -(ux - self.u(x,y))/St, - (uy - self.v(x,y))/St
+
+class PlanarFlowFieldNonInertial(BasePlanarFlowField):
+    def eom(self, x, y, ux, uy, St):
+        """Equation of motion for massive particle immersed in flow field with
+        limiting inertial forces."""
+        return ux, uy, uy**2 - (ux - self.u(x,y))/St, -2*ux*uy - (uy - self.v(x,y))/St
+
+PlanarFlowField = PlanarFlowFieldNonInertial
