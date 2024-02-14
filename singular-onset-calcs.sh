@@ -5,11 +5,39 @@ for m in $mlist; do
     ./critical-stokes.py $m -f power --maxstep 1e-2 --tmax=1e2 >> data/Stc_power_m.csv
 done
 
+mlist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 2, 50))))")
+echo "" > data/Stc_power_m_x2.csv
+for m in $mlist; do
+    echo $m
+    ./critical-stokes.py $m -f power --maxstep 1e-2 --tmax=1e2 -x 2 >> data/Stc_power_m_x2.csv
+done
+
+mlist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 2, 50))))")
+echo "" > data/Stc_power_m_x05.csv
+for m in $mlist; do
+    echo $m
+    ./critical-stokes.py $m -f power --maxstep 1e-2 --tmax=1e2 -x 0.5 >> data/Stc_power_m_x05.csv
+done
+
 Relist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 1e8, 50))))")
 echo "" > data/Stc_hiemenz.csv
 for Re in $Relist; do
     echo $Re
     ./critical-stokes.py $Re -f hiemenz >> data/Stc_hiemenz.csv
+done
+
+Relist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 1e8, 50))))")
+echo "" > data/Stc_hiemenz_x2.csv
+for Re in $Relist; do
+    echo $Re
+    ./critical-stokes.py $Re -f hiemenz -x 2 >> data/Stc_hiemenz_x2.csv
+done
+
+Relist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 1e8, 50))))")
+echo "" > data/Stc_hiemenz_x05.csv
+for Re in $Relist; do
+    echo $Re
+    ./critical-stokes.py $Re -f hiemenz -x 0.5 >> data/Stc_hiemenz_x05.csv
 done
 
 for m in 1.05 1.10 1.15 1.20 1.25 1.30 1.50 2.00; do

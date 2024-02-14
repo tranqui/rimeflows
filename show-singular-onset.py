@@ -128,13 +128,19 @@ for ax in [ax1, ax2]:
 # Show the critical Stokes numbers for the Hiemenz flow (ax3) and the power law model (ax4)
 
 Re,Stc1 = np.genfromtxt('data/Stc_hiemenz.csv').T
-ax3.semilogx(Re, Stc1, lw=lw)
+pl1, = ax3.semilogx(Re, Stc1, lw=lw)
+Re,Stc1 = np.genfromtxt('data/Stc_hiemenz_x05.csv').T
+pl2, = ax3.semilogx(Re, Stc1, '--', lw=lw)
+Re,Stc1 = np.genfromtxt('data/Stc_hiemenz_x2.csv').T
+pl3, = ax3.semilogx(Re, Stc1, ':', lw=lw)
+
 ax3.set_ylim([0, 1])
 ax3.set_xlim([1, 1e8])
 ax3.axhline(y=0.25, ls='dotted')
 ax3.text(1e2, 0.25, 'inviscid limit', ha='center', va='bottom', fontsize=8)
 ax3.axhline(y=Stc_kuwabara, ls='-.')
-ax3.text(2e3, Stc_kuwabara, r'Kuwabara $\alpha=0.15$ ($\mathrm{Re} = 0$)', ha='center', va='bottom', fontsize=8)
+ax3.text(1e4, Stc_kuwabara, r'Kuwabara $\alpha=0.15$ ($\mathrm{Re} = 0$)', ha='center', va='bottom', fontsize=8)
+ax3.legend([pl2, pl1, pl3], ['$x(t=0) = 1/2$', '1', '2'], loc='best')
 
 xticks = np.geomspace(1, 1e8, 9)
 ax3.set_xticks(xticks)
@@ -143,11 +149,17 @@ labels[1::2] = ['' for _ in labels[1::2]]
 ax3.set_xticklabels(labels)
 
 m,Stc1 = np.concatenate([[(1,0)], np.genfromtxt('data/Stc_power_m.csv')]).T
-ax4.plot(m, Stc1, lw=lw)
+pl1, = ax4.plot(m, Stc1, '-', lw=lw, zorder=10)
+m,Stc1 = np.concatenate([[(1,0)], np.genfromtxt('data/Stc_power_m_x05.csv')]).T
+pl2, = ax4.plot(m, Stc1, '--', lw=lw)
+m,Stc1 = np.concatenate([[(1,0)], np.genfromtxt('data/Stc_power_m_x2.csv')]).T
+pl3, = ax4.plot(m, Stc1, ':', lw=lw)
+
 ax4.set_xlim([0, 2])
 ax4.set_ylim([0, 0.6])
 ax4.axhline(y=0.25, ls='dotted')
 ax4.text(0.5, 0.25, 'inviscid limit', ha='center', va='bottom', fontsize=8)
+ax4.legend([pl2, pl1, pl3], ['$x(t=0) = 1/2$', '1', '2'], loc='best')
 
 # ax4.legend(loc='best')
 # ax4.axhline(y=0.25, ls='-.', label='inviscid limit')

@@ -153,7 +153,7 @@ class PlanarFlowField:
             else: assert len(r0) == 4
             eom = lambda t, x: self.eom(*x, St=St)
 
-        collide = lambda t, x: self.collision(*x)
+        collide = lambda t, x: self.collision(*x[:2])
         collide.terminal = True
 
         if xmax is None:
