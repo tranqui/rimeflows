@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 mlist=$(python -c "import numpy as np; print(' '.join(map(str, np.geomspace(1, 2, 50))))")
 echo "" > data/Stc_power_m.csv
 for m in $mlist; do
