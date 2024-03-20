@@ -119,7 +119,7 @@ class BasePlanarFlowField:
         """Function that changes sign to indicate when a collision occurs."""
         return -x
 
-    def trajectory(self, r0, St, xmax=None, ymax=5, return_collision=False,
+    def trajectory(self, r0, St, xmax=None, ymax=None, return_collision=False,
                    tmax=1e2, max_step=np.inf, rtol=1e-12, atol=1e-12, **kwargs):
         """Obtain trajectory for particle immersed in flow field.
 
@@ -155,17 +155,17 @@ class BasePlanarFlowField:
 
         collide = lambda t, x: self.collision(*x[:2])
         collide.terminal = True
+        events = [collide]
 
-        if xmax is None:
-            eps = 1e-6
-            xmax = r0[0] + eps
+        if xmax is not None:
+            out_of_bounds1 = lambda t, x: x[0] - xmax
+            out_of_bounds1.terminal = True
+            events += [out_of_bounds1]
 
-        out_of_bounds1 = lambda t, x: x[0] - xmax
-        out_of_bounds2 = lambda t, x: np.abs(x[1]) - ymax
-        out_of_bounds1.terminal = True
-        out_of_bounds2.terminal = True
-
-        events = (collide, out_of_bounds1, out_of_bounds2)
+        if ymax is not None:
+            out_of_bounds2 = lambda t, x: np.abs(x[1]) - ymax
+            out_of_bounds2.terminal = True
+            events += [out_of_bounds2]
 
         with np.errstate(divide='ignore', invalid='ignore'):
             trajectory = integrate.solve_ivp(eom, [0, tmax], r0, events=events,
@@ -200,7 +200,7 @@ class BasePlanarFlowField:
         _, _, collides = self.trajectory(*args, return_collision=True, **kwargs)
         return collides
 
-    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, return_bounds=False, message_header='', **kwargs):
+    def capture_efficiency(self, x, St, niters=25, quiet=True, *args, return_bounds=False, yguess=1, message_header='', **kwargs):
         """Estimate efficiency of point particle capture.
 
         Args:
@@ -208,6 +208,7 @@ class BasePlanarFlowField:
             St: value of Stokes number we are evaluating efficiency at.
             niters: number of refinement iterations to estimate Stokes number.
             quiet: if True, will suppress iteration updates.
+            yguess: initial guess for collision value of y for iterative algorithm.
             message_header: preface to iteration updates if not quiet.
         Returns:
             Efficiency of particle capture efficiency.
@@ -219,7 +220,7 @@ class BasePlanarFlowField:
             if not quiet: print('on-axis does not lead to collision, so efficiency is zero!')
             return 0
 
-        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
+        ylow, yhigh = logical_refine(collides, niters=niters, quiet=quiet, xguess=yguess, message_header=message_header)
         if return_bounds: return ylow, yhigh
         else:
             yestimate = 0.5 * (ylow + yhigh)
@@ -319,5 +320,12 @@ class PlanarFlowFieldNonInertial(BasePlanarFlowField):
         """Equation of motion for massive particle immersed in flow field with
         limiting inertial forces."""
         return ux, uy, uy**2 - (ux - self.u(x,y))/St, -2*ux*uy - (uy - self.v(x,y))/St
+
+    def trajectory(self, r0, *args, xmax=None, ymax=5, **kwargs):
+        if xmax is None:
+            eps = 1e-6
+            xmax = r0[0] + eps
+
+        return super().trajectory(r0, *args, xmax=xmax, ymax=ymax, **kwargs)
 
 PlanarFlowField = PlanarFlowFieldNonInertial

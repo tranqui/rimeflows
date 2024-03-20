@@ -17,7 +17,7 @@
 import sys
 import numpy as np
 
-def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True, message_header=''):
+def logical_refine(f, niters, xmin=0, xmax=np.inf, xguess=1, quiet=True, message_header=''):
     """Refine location of transition of boolean from True to False.
 
     Args:
@@ -25,6 +25,7 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True, message_header=''
         niters: number of refinement iterations to estimate change over.
         xmin: initial lower bound for sign change.
         xmax: initial upper bound for sign change.
+        xguess: initial guess to establish starting bounds.
         quiet: if True, will suppress iteration updates.
         message_header: preface to iteration updates if not quiet.
     Returns:
@@ -35,8 +36,8 @@ def logical_refine(f, niters, xmin=0, xmax=np.inf, quiet=True, message_header=''
     xupper = xmax
 
     assert f(xlower)
+    assert xguess < xmax
 
-    xguess = 1
     while xguess < xupper:
         if f(xguess): xlower = xguess
         else: xupper = xguess

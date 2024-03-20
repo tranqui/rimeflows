@@ -17,8 +17,8 @@
 import argparse
 import numpy as np, matplotlib.pyplot as plt
 
-from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz, power
-flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power}
+from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz, power, chord
+flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power, 'chord': chord}
 
 parser = argparse.ArgumentParser(description='calculate inertial collection efficiency for point particles at stagnation point flows')
 parser.add_argument('-f', '--flow', default='kuwabara', choices=flow_fields.keys(),
@@ -33,6 +33,8 @@ parser.add_argument('--tmax', default=1e4, type=float,
                     help='max time before aborting integrations (default=1e4)')
 parser.add_argument('--niters', default=50, type=int,
                     help='number of refinement iterations to estimate efficiency (default=50)')
+parser.add_argument('--yguess', default=1., type=float,
+                    help='initial guess for collision value of y to establish starting bounds in iterations')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help='show iteration steps')
 parser.add_argument('flowparams', nargs='*',
@@ -55,5 +57,5 @@ St = Stc + np.geomspace(*args.stokes)
 eff = np.empty(St.size)
 for i,s in enumerate(St):
     eff[i] = flow.capture_efficiency(args.x, s, tmax=args.tmax, max_step=args.maxstep, niters=args.niters,
-                                     quiet=quiet, message_header='capture efficiency param={} St-Stc={:.4g}'.format(repr(args.flowparams), s-Stc))
+                                     quiet=quiet, yguess=args.yguess, message_header='capture efficiency param={} St-Stc={:.4g}'.format(repr(args.flowparams), s-Stc))
     print('  {:^16.12f} {:^16.12f} {:^16.12f}'.format(s, s-Stc, eff[i]))
