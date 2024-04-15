@@ -17,8 +17,8 @@
 import argparse
 import numpy as np, matplotlib.pyplot as plt
 
-from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz, power, chord
-flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power, 'chord': chord}
+from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz, power, chord, eliipse
+flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power, 'chord': chord, 'ellipse': ellipse}
 
 parser = argparse.ArgumentParser(description='calculate critical inertia for point particles to be captured at stagnation point flows')
 parser.add_argument('-f', '--flow', default='kuwabara', choices=flow_fields.keys(),
