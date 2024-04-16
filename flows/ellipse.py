@@ -37,7 +37,7 @@ class FlowField(PlanarFlowFieldInertial):
 
     @property
     def eccentricity(self):
-        return np.sqrt(1 - (self.b/self.a)**2)
+        return np.sqrt(1 - (self.semi_minor_axis/self.semi_major_axis)**2)
 
     @property
     def a_chord(self):
