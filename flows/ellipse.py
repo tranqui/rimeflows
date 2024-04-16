@@ -13,13 +13,14 @@ class FlowField(PlanarFlowFieldInertial):
     here.
     """
 
-    def __init__(self, a, b, alpha=0.5*np.pi, U=1):
+    def __init__(self, a, b, alpha=0, U=1):
         """
         Args:
             a: first semiaxis
             b: second semiaxis
-            alpha: angle of chord to the incoming stream, e.g. alpha=0 for parallel
-                   or alpha=pi/2 for perpendicular.
+            alpha: angle of rotation of ellipse relative to its standard form where
+                   it's aligned with the axes with equation:
+                       $$\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1$$.
             U: flow velocity, which can be normalised to 1.
         """
 
