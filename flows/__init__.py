@@ -1,0 +1,2 @@
+from . import kuwabara, inviscid, rg, stokes, shm, hiemenz, power, chord, ellipse
+flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power, 'chord': chord, 'ellipse': ellipse}

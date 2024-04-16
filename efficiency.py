@@ -17,8 +17,7 @@
 import argparse
 import numpy as np, matplotlib.pyplot as plt
 
-from flows import kuwabara, inviscid, rg, stokes, shm, hiemenz, power, chord, ellipse
-flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm, 'hiemenz': hiemenz, 'power': power, 'chord': chord, 'ellipse': ellipse}
+from flows import flow_fields
 
 parser = argparse.ArgumentParser(description='calculate inertial collection efficiency for point particles at stagnation point flows')
 parser.add_argument('-f', '--flow', default='kuwabara', choices=flow_fields.keys(),

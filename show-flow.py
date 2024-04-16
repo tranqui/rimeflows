@@ -26,8 +26,7 @@ plt.style.use('figstyle.mplstyle')
 from palettes import PurpleGold as palette
 #from palettes import BlueRed as palette
 
-from flows import kuwabara, inviscid, rg, stokes, shm
-flow_fields = {'kuwabara': kuwabara, 'inviscid': inviscid, 'rg': rg, 'stokes': stokes, 'shm': shm}
+from flows import flow_fields
 
 parser = argparse.ArgumentParser(description='make Kuwabara trajectory plot')
 parser.add_argument('-f', '--flow', default='kuwabara', choices=flow_fields.keys(),
