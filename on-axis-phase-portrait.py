@@ -27,7 +27,7 @@ parser.add_argument('epsilon', type=float, nargs='?', default=0,
 args = parser.parse_args()
 
 from flows import hybrid
-flow = hybrid.OnAxis(args.epsilon)
+flow = hybrid.FlowField(args.epsilon).on_axis
 
 figsize = 3.375 # (inches)
 aspect_ratio = 2
@@ -51,33 +51,37 @@ bbox = dict(boxstyle='round', pad=0.1, fc='white', ec='none', alpha=0.75)
 
 xmin = -0.5
 xmax = 1.5
-vmin = -1
-vmax = 1
+umin = -1
+umax = 1
 m = 3
 
-v0 = vmax
+u0 = umax
 
-def draw_streamline(x0, tmax=1e3, N=50000):
-    x, v = flow.streamline(x0, v0, tmax=1e3, N=N,
-                           xmin=(m*xmin), xmax=(m*xmax), vmin=(m*vmin), vmax=(m*vmax))
+def draw_streamline(x0, St=1, tmax=1e3):
+    _, (x1, u1) = flow.trajectory([x0, u0], St=St, tmax=tmax, test_collision=False,
+                                   xmin=(m*xmin), xmax=(m*xmax), umin=(m*umin), umax=(m*umax))
+    _, (x2, u2) = flow.trajectory([x0, u0], St=St, tmax=-tmax, test_collision=False,
+                                   xmin=(m*xmin), xmax=(m*xmax), umin=(m*umin), umax=(m*umax))
+    x = np.concatenate([np.flipud(x2), x1])
+    u = np.concatenate([np.flipud(u2), u1])
 
     if x0 < separatrix_x and x[-1] > 0: c = stable_streamline_color
     else: c = unstable_streamline_color
 
-    pl, = ax.plot(x, v, lw=0.5, c=c, zorder=-2)
+    pl, = ax.plot(x, u, lw=0.5, c=c, zorder=-2)
     arrows = []
     arrows += add_arrow(pl, y=-0.075, zorder=-1)
     arrows += add_arrow(pl, y=-0.4, zorder=-1)
     return pl, arrows
 
-# Find the location of the separatrix at our initial v:
-x, v = flow.separatrix()
-guess = np.where((v-v0)**2 < 0.1)[0]
+# Find the location of the separatrix at our initial u:
+x, u = flow.separatrix()
+guess = np.where((u-u0)**2 < 0.1)[0]
 guess = guess[np.argmax(x[guess])]
-ax.plot(x[guess], v[guess], 'ko', mfc='None', mew=0.5, zorder=100)
+ax.plot(x[guess], u[guess], 'ko', mfc='None', mew=0.5, zorder=100)
 fx = interpolate.interp1d(np.arange(len(x)), x, kind='quadratic')
-fv = interpolate.interp1d(np.arange(len(v)), v, kind='quadratic')
-separatrix_x = fx( optimize.minimize(lambda i: (fv(i) - v0)**2, guess).x )[0]
+fu = interpolate.interp1d(np.arange(len(u)), u, kind='quadratic')
+separatrix_x = fx( optimize.minimize(lambda i: (fu(i) - u0)**2, guess).x )[0]
 
 # Sample points on either side of the separatrix across the full visible range so we
 # fill space with stream lines
@@ -89,28 +93,28 @@ x_range = np.hstack((central_x - delta_x, central_x + delta_x))
 for x0 in x_range: draw_streamline(x0)
 sep_pl, sep_arrows = draw_streamline(central_x)
 
-x, v = flow.limit_colliding_streamline()
-ax.plot(x, v, lw=0.5, c=unstable_streamline_color, zorder=-8)
+x, u = flow.limit_colliding_trajectory()
+ax.plot(x, u, lw=0.5, c=unstable_streamline_color, zorder=-8)
 
 x = np.linspace(0, xmax, 100)
-v = stokes.nullcline(x)
-pl_nullcline, = ax.plot(x, v, '--', c=nullcline_color)
+u = flow.u(x)
+pl_nullcline, = ax.plot(x, u, '--', c=nullcline_color)
 
-x, v, (xc, vc) = flow.separatrix(return_critical_point=True)
-select = np.logical_and(x < 0, v < 1)
-pl, = ax.plot(x[select]-1e-2, v[select], c=unstable_streamline_color, lw=0.5)
+x, u, (xc, uc) = flow.separatrix(return_critical_point=True)
+select = np.logical_and(x < 0, u < 1)
+pl, = ax.plot(x[select]-1e-2, u[select], c=unstable_streamline_color, lw=0.5)
 add_arrow(pl, y=0.1, zorder=-1, direction='backward')
-#ax.plot(x, v, c=separatrix_color)
+#ax.plot(x, u, c=separatrix_color)
 #ax.plot(0, 0, 'o', c=separatrix_color, mfc='w', zorder=20)
-#ax.plot(xc, vc, 'o', c=separatrix_color, mfc=unstable_streamline_color, zorder=20)
+#ax.plot(xc, uc, 'o', c=separatrix_color, mfc=unstable_streamline_color, zorder=20)
 #ax.plot(0, 0, 'o', c=separatrix_color, mfc=separatrix_color)
 
-ax.fill_between([xmin, xmax], vmin, vmax, facecolor=unstable_manifold_color, zorder=-10)
-ax.fill_between(x[x > 0], 0, v[x > 0], facecolor=stable_manifold_color, zorder=-5)
-ax.fill_between(x[x < 0.1], 0, v[x < 0.1], facecolor=stable_manifold_color, zorder=-5)
+ax.fill_between([xmin, xmax], umin, umax, facecolor=unstable_manifold_color, zorder=-10)
+ax.fill_between(x[x > 0], 0, u[x > 0], facecolor=stable_manifold_color, zorder=-5)
+ax.fill_between(x[x < 0.1], 0, u[x < 0.1], facecolor=stable_manifold_color, zorder=-5)
 
 ax.set_xlim([m*xmin, m*xmax])
-ax.set_ylim([m*vmin, m*vmax])
+ax.set_ylim([m*umin, m*umax])
 
 ax.set_xlim([0, 1])
 ax.set_ylim([-0.5, 0])
@@ -119,9 +123,9 @@ ax.set_xlabel(r'$\mathrm{St}^{\frac{1}{1 - \epsilon}} \, x$')
 ax.set_ylabel(r'$\mathrm{St}^{\frac{2 - \epsilon}{1 - \epsilon}} \, \dot{x}$')
 
 label = ax.text(0.99, 0.06, r'$\epsilon={:.3f}$'.format(args.epsilon), transform=ax.transAxes,
-                fontsize=10, bbox=bbox, horizontalalignment='right', verticalalignment='bottom')
+                fontsize=10, bbox=bbox, ha='right', va='bottom')
 
-plt.savefig('data/hybrid_streamlines_eps={:.3f}.png'.format(args.epsilon), dpi=1000)
+# plt.savefig('data/hybrid_streamlines_eps={:.3f}.png'.format(args.epsilon), dpi=1000)
 
 ax.axis('off')
 
@@ -131,5 +135,5 @@ sep_pl.set_visible(False)
 for arrow in sep_arrows: arrow.set_visible(False)
 pl_nullcline.set_visible(False)
 
-plt.savefig('data/hybrid_streamlines_noaxis_eps={:.3f}.png'.format(args.epsilon), bbox_inches='tight', pad_inches=0, dpi=1000)
-#plt.show()
+# plt.savefig('data/hybrid_streamlines_noaxis_eps={:.3f}.png'.format(args.epsilon), bbox_inches='tight', pad_inches=0, dpi=1000)
+plt.show()
