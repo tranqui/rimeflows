@@ -328,8 +328,8 @@ class BasePlanarFlowField:
             message_header: preface to iteration updates if not quiet.
         """
 
-        collides = lambda St: not self.on_axis.does_collide(x, St, *args, **kwargs)
-        Stc_low, Stc_high = logical_refine(collides, niters=niters, quiet=quiet, message_header=message_header)
+        noncollides = lambda St: not self.on_axis.does_collide(x, St, *args, **kwargs)
+        Stc_low, Stc_high = logical_refine(noncollides, niters=niters, quiet=quiet, message_header=message_header)
         return 0.5 * (Stc_low + Stc_high)
 
 
