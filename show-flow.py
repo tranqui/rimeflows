@@ -85,15 +85,15 @@ if args.efficiency:
     St, dSt, eff = np.genfromtxt(args.efficiency, skip_header=1).T
     Stc = St[0] - dSt[0]
     main.loglog(dSt, eff, 'o', mfc='w')
-    main.set_xlabel('$\mathrm{St} - \mathrm{St}_c$')
-    main.set_ylabel('capture efficiency $\lambda$')
+    main.set_xlabel(r'$\mathrm{St} - \mathrm{St}_c$')
+    main.set_ylabel(r'capture efficiency $\lambda$')
 
     #figsize = tuple(0.1*s for s in figsize)
     figsize = (0.35, 0.35)
     lin = main.inset_axes([0.125, 0.975 - figsize[1], figsize[0], figsize[1]])
     lin.plot(St, eff, 'o', mfc='w')
-    lin.set_xlabel('$\mathrm{St}$', labelpad=-5)
-    lin.set_ylabel('$\lambda$', labelpad=-5)
+    lin.set_xlabel(r'$\mathrm{St}$', labelpad=-5)
+    lin.set_ylabel(r'$\lambda$', labelpad=-5)
 
     lin.set_xlim([0., 2])
     lin.set_xticks([0, 2], minor=False)
@@ -119,7 +119,7 @@ if args.efficiency:
     lin.set_ylim(lin_ylim)
 
     # Label location of critical Stokes
-    lin.annotate('$\mathrm{St}_c$',
+    lin.annotate(r'$\mathrm{St}_c$',
                  xytext=(Stc, 0.75*lin_ylim[-1]),
                  xy=(Stc, 0),
                  ha='center', va='bottom',
