@@ -50,7 +50,7 @@ class FlowField(PlanarFlowFieldInertial):
 
     @property
     def matplotlib_draw_angle(self):
-        return -180*alpha/np.pi
+        return -180*self.alpha/np.pi
 
     def complex_potential(self, x, y):
         """Representation of flow field via its complex potential.
