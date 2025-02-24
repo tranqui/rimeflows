@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/526563416.svg)](https://doi.org/10.5281/zenodo.14919387)
+
 ## Overview
 
 This package contains the calculations underlying the following work:
