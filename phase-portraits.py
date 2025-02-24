@@ -24,11 +24,6 @@ plt.rcParams['figure.constrained_layout.use'] = False
 from palettes import PurpleGold as palette
 #from palettes import BlueRed as palette
 
-import argparse
-parser = argparse.ArgumentParser(description='show phase portraits of toy models')
-parser.add_argument('-o', '--output', type=str, help='output plot to file (e.g. pdf or png)')
-args = parser.parse_args()
-
 from flows import stokes, shm, power
 stokes = stokes.FlowField().on_axis
 shm = shm.FlowField().on_axis
@@ -362,6 +357,6 @@ ax1.set_title('$u = -x^2$')
 ax3.set_title('$u = -x$')
 ax5.set_title(r'$u = -|x|^m$, $\mathrm{St} = 1$')
 
-if args.output: plt.savefig(args.output, pad_inches=0.1)
+plt.savefig('phase-portraits-3panel.pdf', pad_inches=0.1)
 
 plt.show()

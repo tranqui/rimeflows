@@ -25,13 +25,10 @@ paths_hiemenz = natsorted(glob('data/efficiency_hiemenz*.csv'))
 paths_power = glob('data/efficiency_power*.csv')
 indices = np.argsort([float(p.split('m=')[-1].split('.csv')[0]) for p in paths_power])
 paths_power = [paths_power[i] for i in indices]
-for p in paths_power: print(p)
-# paths_power = natsorted(glob('data/efficiency_power*.csv'))
-# for p in paths_power: print(p)
 
 figsize = (3.375, 2.5)
-fig1, (ax3, ax1) = plt.subplots(nrows=2, figsize=(figsize[0], 2*figsize[1]), constrained_layout=True)
-fig2, (ax4, ax2) = plt.subplots(nrows=2, figsize=(figsize[0], 2*figsize[1]), constrained_layout=True)
+fig1, (ax1, ax2) = plt.subplots(nrows=2, figsize=(figsize[0], 2*figsize[1]), constrained_layout=True)
+fig2, (ax3, ax4) = plt.subplots(nrows=2, figsize=(figsize[0], 2*figsize[1]), constrained_layout=True)
 
 # Show collection efficiencies for Hiemenz model (ax1):
 
@@ -170,15 +167,16 @@ ax4.set_xlabel('$m$')
 
 # Letter each subpanel:
 
-x, y, fontsize, ha, va = -0.175, 0.9, 18, 'left', 'bottom'
-for axes in [[ax3, ax1], [ax4, ax2]]:
+y, fontsize, ha, va = 0.9, 18, 'left', 'bottom'
+for (x, axes) in [(-0.175, [ax1, ax2]), (-0.15, [ax3, ax4])]:
     for ax, letter in zip(axes, 'ab'):
         label = ax.text(x, y, r'\textbf{%s}' % letter, transform=ax.transAxes, zorder=20,
                         fontsize=fontsize, horizontalalignment=ha, verticalalignment=va)
         label.set_in_layout(False)
 
-fig1.savefig('singular-onset-hiemenz.pdf')
-fig1.savefig('singular-onset-hiemenz.png')
-fig2.savefig('singular-onset-power.pdf')
-fig2.savefig('singular-onset-power.png')
-# plt.show()
+fig1.savefig('singular-onset.pdf')
+fig1.savefig('singular-onset.png')
+fig2.savefig('singular-threshold.pdf')
+fig2.savefig('singular-threshold.png')
+
+plt.show()
