@@ -16,7 +16,7 @@
 
 import numpy as np
 from scipy import special
-from scipy.misc import derivative
+from scipy.differentiate import derivative
 from scipy.special import iv, kn
 def knp(m, x): return special.kvp(m, x, 1)
 def ivp(m, x): return special.ivp(m, x, 1)
