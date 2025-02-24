@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-# utilities.py -- supporting code for filtration calculations.
-
-# Copyright (c) 2022 Patrick B Warren <patrick.warren@stfc.ac.uk>
+# Copyright (c) 2025 Patrick B Warren <patrick.warren@stfc.ac.uk>
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
