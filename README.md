@@ -10,16 +10,17 @@ This code performs calculations of point particle capture efficiency in model 2d
 2. [`show-kuwabara.py`](https://github.com/tranqui/rimeflows/blob/main/show-kuwabara.py)
 3. [`phase-portraits.py`](https://github.com/tranqui/rimeflows/blob/main/phase-portraits.py)
 4. [`show-singular-onset.py`](https://github.com/tranqui/rimeflows/blob/main/show-singular-onset.py)
-5. [`unknown.ipynb`](https://github.com/tranqui/rimeflows/blob/main/unknown.ipynb)
+5. [`ellipse-plot.ipynb`](https://github.com/tranqui/rimeflows/blob/main/ellipse-plot.ipynb)
 6. [`show-singular-onset.py`](https://github.com/tranqui/rimeflows/blob/main/show-singular-onset.py)
-7. [`unknown.ipynb`](https://github.com/tranqui/rimeflows/blob/main/unknown.ipynb)
+7. [`ellipse-plot.ipynb`](https://github.com/tranqui/rimeflows/blob/main/ellipse-plot.ipynb)
 
 These scripts primarily plot data that was pregenerated using the scripts
 
 1. [`critical-stokes.py`](https://github.com/tranqui/rimeflows/blob/main/critical-stokes.py): measures the critical Stokes number above which particles are deposited onto a surface.
 2. [`efficiency.py`](https://github.com/tranqui/rimeflows/blob/main/efficiency.py): measures the efficiency of particle deposition above the critical Stokes number.
+3. [`ellipse-calculations.ipynb`](https://github.com/tranqui/rimeflows/blob/main/ellipse-calculations.ipynb): a standalone Jupyter notebook which performs calculations for particle deposition for inviscid flow around an ellipse. This does the calculations underlying the plots in Figs. 5 and 7 above.
 
-These two scripts work with the flow fields which are defined in the [`flows`](https://github.com/tranqui/rimeflows/blob/main/flows.py) subdirectory. The precalculated data used in the scripts was obtained via executing the two scripts above with various argument through the script [`batch-calcs.sh`](https://github.com/tranqui/rimeflows/blob/main/batch-calcs.sh).
+The first two scripts above work with the flow fields which are defined in the [`flows`](https://github.com/tranqui/rimeflows/blob/main/flows.py) subdirectory. The precalculated data used in the non-ellipse scripts was obtained via executing the two scripts above with various argument through the script [`batch-calcs.sh`](https://github.com/tranqui/rimeflows/blob/main/batch-calcs.sh).
 
 ### Copying
 
