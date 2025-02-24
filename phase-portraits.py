@@ -274,7 +274,7 @@ for m,ax in zip([1.5, 0.5], [ax5,ax6]):
 for ax in [ax3, ax4]:
     ax.plot(0, 0, 'o', mfc='w', c=palette.separatrix_colour, zorder=20)
 
-    ax.set_ylabel('$\dot{x}$')
+    ax.set_ylabel(r'$\dot{x}$')
 
     x = np.linspace(xmin, xmax, 10)
     ax.plot(x, -x, '--', c=palette.nullcline_colour)
@@ -349,7 +349,7 @@ for ax,l in zip(axes.flatten(), 'acebdf'):
                      fontsize=18, ha='left', va='bottom')
     label.set_in_layout(False)
 
-for ax in axes.flatten(): ax.set_ylabel('$\dot{x}$')
+for ax in axes.flatten(): ax.set_ylabel(r'$\dot{x}$')
 for ax in axes[0]: ax.set_xticklabels([])
 for ax in axes[-1]: ax.set_label('$x$')
 
@@ -360,7 +360,7 @@ ax2.set_yticks([-1, -0.5, 0, 0.5])
 
 ax1.set_title('$u = -x^2$')
 ax3.set_title('$u = -x$')
-ax5.set_title('$u = -|x|^m$, $\mathrm{St} = 1$')
+ax5.set_title(r'$u = -|x|^m$, $\mathrm{St} = 1$')
 
 if args.output: plt.savefig(args.output, pad_inches=0.1)
 
